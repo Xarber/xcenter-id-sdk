@@ -124,7 +124,7 @@ public struct AccountOverview<Settings: View>: View {
             defer { busy = false }
             do { try await operation() }
             catch is CancellationError { }
-            catch { error = "X-Center ID could not complete this action." }
+            catch { self.error = "X-Center ID could not complete this action." }
         }
     }
 }
