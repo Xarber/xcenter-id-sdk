@@ -1,0 +1,43 @@
+{
+  "name": "@authnjs/expo",
+  "version": "0.3.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "main": "./index.tsx",
+  "types": "./index.tsx",
+  "files": [
+    "index.tsx",
+    "README.md",
+    "LICENSE",
+    "authorize-native.ts",
+    "backend-signin.ts",
+    "managed-signin-urls.ts",
+    "assets",
+    "registered-signin.tsx",
+    "account-overview.tsx"
+  ],
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-native": ">=0.83 <0.89",
+    "expo-auth-session": "~58.0.18 || ~58.0.19",
+    "expo-crypto": "~58.0.8",
+    "expo-web-browser": "~58.0.8 || ~58.1.0"
+  },
+  "exports": {
+    ".": "./index.tsx",
+    "./authorize-native": "./authorize-native.ts",
+    "./registered-signin": "./registered-signin.tsx",
+    "./account-overview": "./account-overview.tsx"
+  },
+  "peerDependenciesMeta": {
+    "expo-auth-session": {
+      "optional": true
+    },
+    "expo-crypto": {
+      "optional": true
+    },
+    "expo-web-browser": {
+      "optional": true
+    }
+  }
+}

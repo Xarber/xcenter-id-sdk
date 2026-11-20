@@ -1,0 +1,213 @@
+{
+  "type": "object",
+  "required": [
+    "uadsVersion",
+    "manifestVersion",
+    "project",
+    "features",
+    "distribution",
+    "quality",
+    "requirements",
+    "exceptions"
+  ],
+  "properties": {
+    "uadsVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifestVersion": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "name",
+        "repository",
+        "profiles",
+        "platforms",
+        "framework",
+        "hosting"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "mobile-app",
+              "desktop-app",
+              "web-app",
+              "web-service",
+              "backend-service",
+              "cli-tool",
+              "library",
+              "hybrid"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ios",
+              "android",
+              "web",
+              "macos",
+              "windows",
+              "linux"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "framework": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hosting": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "legacy",
+          "implemented",
+          "planned"
+        ]
+      }
+    },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "quality": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "applicability",
+          "state",
+          "references"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^UADS-[A-Z]+-[0-9]{3}$"
+          },
+          "applicability": {
+            "enum": [
+              "required",
+              "conditional",
+              "optional",
+              "not-applicable",
+              "approved-exception"
+            ]
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "passed",
+              "failed",
+              "blocked",
+              "not-applicable",
+              "waived"
+            ]
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "uniqueItems": true
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "requirementId",
+          "reason",
+          "risks",
+          "mitigations",
+          "approvedBy",
+          "approvedOn",
+          "reviewOn",
+          "platforms",
+          "revisitWhen"
+        ],
+        "properties": {
+          "requirementId": {
+            "type": "string",
+            "pattern": "^UADS-[A-Z]+-[0-9]{3}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risks": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mitigations": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approvedBy": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approvedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "reviewOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "revisitWhen": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "uniqueItems": true
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

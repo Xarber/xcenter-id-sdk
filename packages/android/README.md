@@ -1,0 +1,7 @@
+# Android / Jetpack Compose
+
+Add this Android library as a source module, or use a local Gradle composite build and substitute it for a host-configured module. The standalone build uses JDK 17, Gradle 8.13 and Android SDK 36. For source vendoring in an existing build, use the host's compatible Android/Kotlin plugins and keep the Compose, Browser and image-loader dependencies from `build.gradle.kts`.
+
+Place `AccountOverview(profile, clientId, signIn, signOut)` in Settings and supply the optional trailing composable for product settings. Construct `BrowserSignIn(activity)` unconditionally before the Activity starts. In the `signIn` handler start the OIDC transaction, await `browser.authorize(BrowserRequest(authorization, callback))`, then validate and exchange the callback with your transaction-bound host. If the browser returns null, the user canceled. Keep the browser controller with the Activity. If the Activity or process is recreated, restart any interrupted transaction rather than accepting an unsolicited result.
+
+Use an exact verified HTTPS Android App Link for the app's native registration. Publish Asset Links for the correct application ID and production signing certificate. Use a supported system browser with Auth Tab for this adapter. If a target has no supported Auth Tab or cannot claim the link, implement the proof-bound backend flow with the system browser described in [integration](../../docs/integration.md). Android App Link and issuer validation are both required.

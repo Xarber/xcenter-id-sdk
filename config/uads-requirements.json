@@ -1,0 +1,58 @@
+[
+  {
+    "id": "UADS-DOC-001",
+    "title": "Install and integration documentation",
+    "section": 4,
+    "applicability": "required",
+    "evidence": "docs/INDEX.md"
+  },
+  {
+    "id": "UADS-PLAT-001",
+    "title": "Framework compatibility",
+    "section": 10,
+    "applicability": "required",
+    "evidence": "docs/TESTING.md"
+  },
+  {
+    "id": "UADS-QA-001",
+    "title": "Platform source and browser validation",
+    "section": 42,
+    "applicability": "required",
+    "evidence": ".github/workflows/uads-quality.yml"
+  },
+  {
+    "id": "UADS-SEC-001",
+    "title": "Authorization and session boundaries",
+    "section": 43,
+    "applicability": "required",
+    "evidence": "docs/SECURITY.md"
+  },
+  {
+    "id": "UADS-REL-001",
+    "title": "Traceable library releases",
+    "section": 44,
+    "applicability": "required",
+    "evidence": "docs/RELEASES.md"
+  },
+  {
+    "id": "UADS-UI-001",
+    "title": "Accessible account surfaces",
+    "section": 18,
+    "applicability": "required",
+    "evidence": "docs/TESTING.md"
+  },
+  {
+    "id": "UADS-DIST-001",
+    "title": "Installable application distribution",
+    "section": 25,
+    "applicability": "not-applicable",
+    "evidence": "docs/RELEASES.md"
+  },
+  {
+    "id": "UADS-OPS-001",
+    "title": "Production service health monitoring",
+    "section": 45,
+    "applicability": "not-applicable",
+    "evidence": "docs/INDEX.md"
+  }
+]

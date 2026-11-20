@@ -1,0 +1,9 @@
+{
+  "name": "@xcenter-id/server",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "engines": {"node": ">=22"},
+  "exports": {".": "./index.js"},
+  "dependencies": {"openid-client": "^6.8.4"}
+}

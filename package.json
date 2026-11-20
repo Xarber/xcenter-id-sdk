@@ -1,0 +1,16 @@
+{
+  "name": "xcenter-id-sdk-source",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "workspaces": [
+    "packages/web",
+    "packages/server"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.1"
+  }
+}

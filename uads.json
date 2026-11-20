@@ -1,0 +1,101 @@
+{
+  "uadsVersion": "2026-11-16-instructions",
+  "manifestVersion": 1,
+  "project": {
+    "name": "X-Center ID SDK",
+    "repository": "Xarber/xcenter-id-sdk",
+    "profiles": [
+      "library"
+    ],
+    "platforms": [
+      "web",
+      "ios",
+      "android",
+      "macos"
+    ],
+    "framework": "Expo, SwiftUI, Kotlin Compose, Flutter, Web Components and Node.js",
+    "hosting": "GitHub source distribution. Applications connect to the X-Center ID HTTPS issuer."
+  },
+  "features": {
+    "accountOverview": "implemented",
+    "registeredBrowserSignIn": "implemented",
+    "proofBoundIOSPickupAdapter": "implemented",
+    "webOIDCAdapter": "implemented"
+  },
+  "distribution": {
+    "github": "source"
+  },
+  "quality": [
+    "Manifest validation",
+    "Browser smoke test",
+    "OIDC boundary tests",
+    "Swift, Kotlin and Dart checks"
+  ],
+  "requirements": [
+    {
+      "id": "UADS-DOC-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        "docs/INDEX.md"
+      ]
+    },
+    {
+      "id": "UADS-PLAT-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        "docs/TESTING.md"
+      ]
+    },
+    {
+      "id": "UADS-QA-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        ".github/workflows/uads-quality.yml"
+      ]
+    },
+    {
+      "id": "UADS-SEC-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        "docs/SECURITY.md"
+      ]
+    },
+    {
+      "id": "UADS-REL-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        "docs/RELEASES.md"
+      ]
+    },
+    {
+      "id": "UADS-UI-001",
+      "applicability": "required",
+      "state": "pending",
+      "references": [
+        "docs/TESTING.md"
+      ]
+    },
+    {
+      "id": "UADS-DIST-001",
+      "applicability": "not-applicable",
+      "state": "not-applicable",
+      "references": [
+        "docs/RELEASES.md"
+      ]
+    },
+    {
+      "id": "UADS-OPS-001",
+      "applicability": "not-applicable",
+      "state": "not-applicable",
+      "references": [
+        "docs/INDEX.md"
+      ]
+    }
+  ],
+  "exceptions": []
+}
