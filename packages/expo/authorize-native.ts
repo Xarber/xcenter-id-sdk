@@ -43,7 +43,7 @@ export async function authorizeNative({ issuer, clientId, redirectUri,scopes=['o
     [discovery.authorizationEndpoint,discovery.tokenEndpoint].some(endpoint=>new URL(endpoint).origin!==new URL(issuer).origin)) {
     throw new Error('Invalid issuer discovery');
   }
-  if(scopes.length>7||scopes.some(scope=>!['openid','profile','email','age_range','app_data','friends','offline_access'].includes(scope)))throw new Error('Unsupported X-Center permission scope');
+  if(scopes.length>10||scopes.some(scope=>!['openid','profile','email','age_range','app_data','friends','offline_access','files_read','files_write','shared_files_read'].includes(scope)))throw new Error('Unsupported X-Center permission scope');
   if(providedNonce&&!/^[A-Za-z0-9_-]{22,256}$/.test(providedNonce))throw new Error('Use a cryptographically random transaction nonce');
   const nonce = providedNonce??randomUUID();
   const request = new AuthRequest({

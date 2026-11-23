@@ -11,7 +11,7 @@ Start with the [sign-in contract](integration.md). Request only the scopes neede
 | Import accepted friends | Request optional `friends` and fetch `GET /v1/profile/friends`. Use `sub` only when present. |
 | Store product-wide records | Use the app's backend key in its dedicated app-owned namespace. |
 | Store data belonging to one signed-in user | Use that app's user access token with `app_data`. |
-| Let users browse and share personal files | Direct them to Files or Friends in the X-Center dashboard. A third-party app token cannot access the account's file cabinet. |
+| Let users browse and share personal files | Direct them to Files or Friends in the X-Center dashboard. An app that needs direct file access can request the separate scopes documented below when issuer discovery exposes them. |
 | Read data offered by a different app | Configure exact source collections, obtain consent, then read the authorized source collection. |
 | Present an opted-in public profile or record | Use the documented public profile or public record endpoint. |
 
@@ -81,3 +81,7 @@ Public profiles are separate from OIDC claims. `GET /public/profiles/USERNAME` r
 ## Account dashboard capabilities
 
 Direct users to X-Center ID to manage passkeys, recovery, sessions, verified email, mail and Hide My Email, personal files, friend invitations, support and unlinking. Mail client access uses user-issued submission/IMAP credentials where enabled. Account photos and contact claims do not give apps mailbox access or email delivery privileges. The developer portal manages domain ownership, callbacks, app branding and verification, required claims, and hosted database settings. Administration handles quotas and moderation through separate account-manager authorization. These management features use the dashboard’s own session.
+
+## Files and read-only app folders
+
+Ask for `files_read` for listing and downloading the user's own files, `files_write` for reading, uploading and removing their own files, and the separate `shared_files_read` for reading files shared with the user. Each is optional and initially off. Use the user's bearer access token with the [file resource contract](https://github.com/Xarber/xcenter-id/blob/testing/docs/FRIENDS.md#file-permissions-for-registered-apps). Keep file permissions distinct from private app data (`app_data`) and app-owned storage. Cross-app data consent requires the source app to be linked. Verified developers can opt their own app into read-only visibility in the user's Files browser.

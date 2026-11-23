@@ -81,3 +81,7 @@ Public profiles are separate from OIDC claims. `GET /public/profiles/USERNAME` r
 ## Account dashboard capabilities
 
 Direct users to X-Center ID to manage passkeys, recovery, sessions, verified email, mail and Hide My Email, personal files, friend invitations, support and unlinking. Mail client access uses user-issued submission/IMAP credentials where enabled. Account photos and contact claims do not give apps mailbox access or email delivery privileges. The developer portal manages domain ownership, callbacks, app branding and verification, required claims, and hosted database settings. Administration handles quotas and moderation through separate account-manager authorization. These management features use the dashboard’s own session.
+
+### Account files
+
+Where the issuer advertises them, `files_read`, `files_write`, and `shared_files_read` are independent optional scopes. Use the user’s bearer access token with the [file resource contract](https://github.com/Xarber/xcenter-id/blob/testing/docs/FRIENDS.md#file-permissions-for-registered-apps). `app_data` remains for private application records. An active registration and the user’s grant enable private user-container storage. A verified registration is required for the product’s own service database.
