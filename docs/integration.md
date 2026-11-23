@@ -1,9 +1,10 @@
 # Register the app and connect sign-in
 
 1. Sign in at [X-Center ID](https://id.xcenter.it). Open **Developer apps → Register app**. Choose a unique app identity, display name and exact HTTPS callback.
-2. For websites, choose **Website backend**. Use a callback on your canonical product host and keep the client secret in your protected backend. For a native app with signed HTTPS return, register a **native public client** and configure the matching Universal Link or Android App Link. Do not embed a confidential client secret.
-3. Copy the registration's DNS verification record to the requested hostname. Wait for lookup to work publicly and use the portal's verification/activation flow. If you cannot prove domain control, use the portal's explicit local registration mode only when its loopback constraints fit the product. It has a different trust level and cannot masquerade as a secure registration.
-4. Copy the active client ID. Select profile requirements and shared permissions in the portal and request the matching scopes. Test sign-in with an isolated account before shipping, including the already-linked consent screen and denied permissions.
+2. Strongly prefer uploading the product’s real icon in **Choose app icon** while setting up the registration. It is optional and helps users recognize the app at consent.
+3. For websites, choose **Website backend**. Use a callback on your canonical product host and keep the client secret in your protected backend. For a native app with signed HTTPS return, register a **native public client** and configure the matching Universal Link or Android App Link. Do not embed a confidential client secret.
+4. Copy the registration's DNS verification record to the requested hostname. Wait for lookup to work publicly and use the portal's verification/activation flow. If you cannot prove domain control, use the portal's explicit local registration mode only when its loopback constraints fit the product. It has a different trust level and cannot masquerade as a secure registration.
+5. Copy the active client ID. Select profile requirements and shared permissions in the portal and request the matching scopes. Test sign-in with an isolated account before shipping, including the already-linked consent screen and denied permissions.
 
 ## Secure browser and product session
 
