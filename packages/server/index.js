@@ -24,7 +24,7 @@ export function validateCallback(value, redirect) {
 
 export async function createXCenterOIDC(options) {
   const {clientId,clientSecret,redirectUri,scopes,promptConsent,allowLoopback}=loadXCenterConfig(options);
-  if (!clientId) throw new Error('Register the application in the Developer portal.');
+  if (!redirectUri) throw new Error('Configure the exact callback URL registered in Developer Apps.');
   const candidate = new URL(redirectUri);
   const local = allowLoopback && candidate.protocol === 'http:' &&
     ['127.0.0.1','[::1]'].includes(candidate.hostname) && candidate.port &&

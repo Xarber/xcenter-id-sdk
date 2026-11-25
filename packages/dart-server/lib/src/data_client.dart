@@ -33,24 +33,24 @@ class XCenterDataClient {
   Future<Uint8List> appIcon(String id) => _send('/public/app-icons/${_segment(id, 36)}', authenticated: false);
 
   Future<Uint8List> listRecords(String collection, {String? cursor, String? sharedFrom}) =>
-      _send(_records('v1', sharedFrom ?? _own, collection), query: {'cursor': ?cursor});
+      _send(_records('v1', sharedFrom ?? _own, collection), query: {if (cursor != null) 'cursor': cursor});
   Future<Uint8List> getRecord(String collection, String id, {String? sharedFrom}) =>
       _send('${_records('v1', sharedFrom ?? _own, collection)}/${_segment(id)}');
   Future<Uint8List> listPublicRecords(String client, String collection, {String? cursor}) =>
-      _send(_records('public', client, collection), authenticated: false, query: {'cursor': ?cursor});
+      _send(_records('public', client, collection), authenticated: false, query: {if (cursor != null) 'cursor': cursor});
   Future<Uint8List> getPublicRecord(String client, String collection, String id) =>
       _send('${_records('public', client, collection)}/${_segment(id)}', authenticated: false);
 
   Future<Uint8List> putRecord(String collection, String id,
       {required Object? data, required bool isPublic, required int revision, List<String>? readers}) =>
       _send('${_records('v1', _own, collection)}/${_segment(id)}', method: 'PUT', revision: revision,
-          body: {'data': data, 'public': isPublic, 'readers': ?readers});
+          body: {'data': data, 'public': isPublic, if (readers != null) 'readers': readers});
   Future<Uint8List> deleteRecord(String collection, String id, {required int revision}) {
     if (revision < 1) throw ArgumentError('Supply the current revision.');
     return _send('${_records('v1', _own, collection)}/${_segment(id)}', method: 'DELETE', revision: revision);
   }
 
-  Future<Uint8List> listFiles({String? folder}) => _send('/v1/files', query: {'folder': ?folder});
+  Future<Uint8List> listFiles({String? folder}) => _send('/v1/files', query: {if (folder != null) 'folder': folder});
   Future<Uint8List> downloadFile(String id) => _send('/v1/files/${_segment(id, 36)}');
   Future<Uint8List> listSharedFiles() => _send('/v1/files/shared');
   Future<Uint8List> downloadSharedFile(String id) => _send('/v1/files/shared/${_segment(id, 36)}');

@@ -15,7 +15,7 @@ Add X-Center ID to your app's Settings. A single **AccountOverview** shows a sig
 | Other backends and platforms | [OpenID Connect integration](docs/integration.md) and the [public API guide](https://id.xcenter.it/docs#manual) |
 
 1. Register your app and activate its exact HTTPS callback in the [Developer portal](https://id.xcenter.it/developer). Use the [integration guide](docs/integration.md) to select a registration type.
-2. Install the component for your stack and bind it to a product session. Use the secure system browser for the provider's passkeys and signup.
+2. Install the component for your stack, [configure the SDK](docs/CONFIGURATION.md), and bind it to a product session. Use the secure system browser for the provider's passkeys and signup.
 3. Choose the smallest set of [capabilities](docs/capabilities.md) your app needs. The same provider APIs support profile details, email and Hide My Email, friends, private user sync, verified app storage, and cross-app sharing.
 
 For agent-assisted setup, install the [Integrate X-Center ID skill](skills/integrate-xcenter-id) from this repository.

@@ -26,6 +26,24 @@ if (transaction) await completeSignInWithYourBackend(transaction);
 
 Configure the exact HTTPS app-link callback in the issuer and both native association files. Use a public client reserved for native user sign-in. The helper checks discovery, creates fresh state and nonce, uses PKCE S256, then returns the one-time authorization code and verifier. The app's backend exchanges the code against its configured issuer and validates the ID token issuer, audience, signature, expiry and nonce before issuing its own session. Bind completion to the app's own sign-in transaction. Discard the code, verifier and nonce after use and keep them out of logs. Browser cancellation returns null. Privileged record sharing remains with the approved confidential backend.
 
+## SDK-managed native sign-in
+
+`createExpoOAuth` runs the browser, exchanges the code, verifies the signed identity, and returns the user and tokens. Use it as the `onSignIn` handler in Account Overview and save the result through your secure product session adapter. A cancelled browser returns `null`.
+
+```ts
+import { createExpoOAuth } from '@authnjs/expo/oauth';
+import config from './xid.json';
+
+const auth = createExpoOAuth({ config });
+
+async function signIn() {
+  const session = await auth.signIn();
+  if (session) await saveProductSession(session);
+}
+```
+
+Use a public `xid.json` with your registered `clientId`, exact HTTPS `redirectUri`, and requested `scopes`. The constructor also accepts explicit settings and a public environment map. See the [configuration guide](../../docs/CONFIGURATION.md) for secure persistence and token renewal.
+
 ## Registered native app sign-in
 
 Import `RegisteredAppSignIn` from `@authnjs/expo/registered-signin` with the activated native client ID, verified HTTPS callback and an `onAuthorized` handler. The reusable UI includes the transparent X-Center ID mark. It opens the system authentication session with PKCE and returns the code, nonce and verifier to the handler. Exchange the code using the registered public client ID and verify the token issuer, audience, nonce and signature through a maintained OIDC adapter. Keep resulting credentials in secure platform storage. Never place a website client's secret in a mobile bundle.
