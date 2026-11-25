@@ -54,6 +54,17 @@ public final class BrowserSignIn: NSObject, ASWebAuthenticationPresentationConte
         }
     }
 
+    public func signIn(using client:XCenterOAuth,scopes:[String]=[]) async throws -> (tokens:[String:Any],identity:[String:Any])? {
+        let attempt=try client.begin(scopes:scopes)
+        let request=try RegisteredBrowserRequest(authorizationURL:attempt.url,callbackURL:client.redirectURI)
+        guard let callback=try await authorize(request) else { return nil }
+        return try await client.complete(callback,transaction:attempt.transaction)
+    }
+
+    public func signIn(config:XCenterPublicConfig) async throws -> (tokens:[String:Any],identity:[String:Any])? {
+        try await signIn(using:config.identity(),scopes:config.scopes)
+    }
+
     /// Use a backend browser handoff when an HTTPS app callback is unavailable.
     /// The completion closure must poll and redeem a short-lived, proof-bound product session.
     public func authorizeWithPickup(browserURL: URL, backendOrigin: URL,

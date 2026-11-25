@@ -45,6 +45,7 @@ jobs:
         with:
           gradle-version: '8.13'
       - run: gradle --project-dir packages/android assembleRelease
+      - run: gradle --project-dir packages/kotlin-server build
   flutter:
     runs-on: ubuntu-latest
     defaults:
@@ -60,3 +61,9 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      - run: dart pub get
+        working-directory: packages/dart-server
+      - run: dart analyze
+        working-directory: packages/dart-server
+      - run: dart test
+        working-directory: packages/dart-server

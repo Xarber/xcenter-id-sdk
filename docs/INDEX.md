@@ -3,6 +3,7 @@
 The packages provide account settings surfaces and secure sign-in integration for apps that delegate identity to X-Center ID. The provider and its account dashboard are maintained separately.
 
 - [Active SDK tasks](ACTIVE_TASKS.md)
+- [Configuration and sign-in](CONFIGURATION.md)
 - [Data clients and backend SDK](DATA_CLIENTS.md)
 - [API coverage by SDK and platform](API_COVERAGE.md)
 

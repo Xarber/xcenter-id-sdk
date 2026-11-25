@@ -1,0 +1,12 @@
+name: xcenter_id_server
+description: Standalone Dart relying-party and service API clients for X-Center ID.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  http: ^1.6.0
+  jose: ^0.3.5+2
+  crypto: ^3.0.7
+dev_dependencies:
+  test: ^1.26.0

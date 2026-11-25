@@ -34,5 +34,6 @@ The [SDK quality run](https://github.com/Xarber/xcenter-id-sdk/actions/runs/4563
 | ID | State | Work |
 | --- | --- | --- |
 | SDK-005 | Verified | Re-audited the production provider and all SDK entry points. [API coverage](API_COVERAGE.md) records the differences, and the JavaScript request test covers all the available operations. |
-| SDK-006 | Queued | Add standalone server packages for Swift, JVM Kotlin and Dart. Cover confidential auth, token rotation, device authorization, service records and legacy migration while keeping server credentials out of native and web bundles. |
-| SDK-007 | Queued | Add native public-client OAuth exchange and renewal where supported, and verify authenticated data methods with a shared synthetic provider fixture on each target. Keep the existing product-backend handoff available. |
+| SDK-006 | Implemented | Add standalone server packages for Swift, JVM Kotlin and Dart. Cover confidential auth, token rotation, device authorization, service records and legacy migration while keeping server credentials out of native and web bundles. |
+| SDK-007 | Implemented | Add native public-client OAuth exchange and renewal where supported, and verify authenticated data methods with a shared synthetic provider fixture on each target. Keep the existing product-backend handoff available. |
+| SDK-008 | Implemented | Configuration accepts explicit options, environment mappings and public or private `xid.json` according to the runtime. Tests cover precedence, rejection of secrets in public settings and a missing explicit file. |

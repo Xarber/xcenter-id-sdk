@@ -54,3 +54,18 @@ class BrowserSignIn @MainThread constructor(activity: ComponentActivity) {
         }
     }
 }
+
+/** Adds state validation, PKCE exchange and signed ID-token verification to system browser sign-in. */
+suspend fun BrowserSignIn.signIn(client: XCenterOAuth, scopes: Collection<String> = emptyList()): XCenterOAuth.Identity? {
+    val attempt = client.begin(scopes)
+    val returned = authorize(BrowserRequest(Uri.parse(attempt.url.toString()), Uri.parse(client.callback.toString())))
+        ?: return null
+    return withContext(Dispatchers.IO) { client.complete(java.net.URI.create(returned.toString()), attempt.transaction) }
+}
+
+suspend fun BrowserSignIn.signIn(config: XCenterPublicConfig): XCenterOAuth.Identity? =
+    signIn(config.identity(), config.scopes)
+
+/** Load public configuration from the application's assets, never a confidential server file. */
+fun loadXCenterAsset(assets: android.content.res.AssetManager, name: String = "xid.json"): XCenterPublicConfig =
+    assets.open(name).bufferedReader(Charsets.UTF_8).use { XCenterPublicConfig.load(json = it.readText()) }

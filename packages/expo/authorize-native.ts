@@ -19,6 +19,12 @@ export type NativeAuthorizationCode = {
   redirectUri: string;
 };
 
+export type NativeAuthorizationResult = NativeAuthorizationCode & {
+  state: string;
+  callbackUrl: string;
+  expiresAt: number;
+};
+
 function https(value: string) {
   const url = new URL(value);
   return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash;
@@ -26,7 +32,7 @@ function https(value: string) {
 
 /** Obtain a code for the host's approved public sign-in client. */
 export async function authorizeNative({ issuer, clientId, redirectUri,scopes=['openid'],nonce:providedNonce,promptConsent=false }: NativeAuthorizationOptions):
-  Promise<NativeAuthorizationCode | null> {
+  Promise<NativeAuthorizationResult | null> {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     throw new Error('Use the website backend to start web sign-in');
   }
@@ -50,11 +56,12 @@ export async function authorizeNative({ issuer, clientId, redirectUri,scopes=['o
     clientId, redirectUri, responseType: ResponseType.Code, scopes: [...new Set(['openid',...scopes])],
     usePKCE: true, codeChallengeMethod: CodeChallengeMethod.S256, extraParams: { nonce,...(promptConsent||scopes.includes('offline_access')?{prompt:'consent'}:{}) },
   });
+  const expiresAt = Date.now() + 10 * 60_000;
   const result = await request.promptAsync(discovery,{preferUniversalLinks:true});
   if (result.type === 'cancel' || result.type === 'dismiss') return null;
   if (result.type !== 'success' || result.params.state !== request.state ||
     !result.params.code || !request.codeVerifier || !matchesNativeCallback(result.url,redirectUri)) {
     throw new Error('Authorization could not be completed');
   }
-  return { code: result.params.code, verifier: request.codeVerifier, nonce, redirectUri };
+  return { code: result.params.code, verifier: request.codeVerifier, nonce, redirectUri, state:request.state, callbackUrl:result.url, expiresAt };
 }

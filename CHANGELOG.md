@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 · 2026-11-25
+
+- Added public OAuth exchange, signed identity validation and token rotation for registered browser and native apps.
+- Added Swift, Kotlin/JVM and standalone Dart backend clients for confidential OAuth, device approval and service storage.
+- Configure clients through explicit values, environment variables or `xid.json`. Frontend configuration accepts public settings only.
+
 ## 0.2.0 · 2026-11-25
 
 - Added public and user-authorized API clients for plain JavaScript, Expo, Swift, Kotlin and Flutter.

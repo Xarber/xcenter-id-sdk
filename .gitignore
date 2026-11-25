@@ -8,3 +8,4 @@ build/
 .dart_tool/
 .flutter-plugins*
 .packages
+xid.json

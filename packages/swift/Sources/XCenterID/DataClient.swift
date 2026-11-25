@@ -10,18 +10,28 @@ public struct XCenterDataClient {
     public static let issuer = URL(string: "https://id.xcenter.it")!
     private let session: URLSession
     private let clientID: String?
+    private let service: Bool
     private let token: (() async throws -> String)?
 
     public init(session: URLSession? = nil) {
         self.session = session ?? Self.makeSession()
         clientID = nil
+        service = false
         token = nil
     }
 
     public init(clientID: String, session: URLSession? = nil, accessToken: @escaping () async throws -> String) {
         self.clientID = clientID
         self.session = session ?? Self.makeSession()
+        service = false
         token = accessToken
+    }
+
+    @_spi(Server) public init(serviceClientID:String,key:String) {
+        self.clientID = serviceClientID
+        self.session = Self.makeSession()
+        self.service = true
+        self.token = { key }
     }
 
     private final class NoRedirect: NSObject, URLSessionTaskDelegate {
@@ -139,6 +149,16 @@ public struct XCenterDataClient {
     public func deleteFile(_ id: String) async throws -> Data { try await request(["v1","files",id], method:"DELETE") }
     public func deleteFolder(_ id: String) async throws -> Data { try await request(["v1","files","folders",id], method:"DELETE") }
 
+    @_spi(Server) public func savedPlace(_ id:String?=nil, method:String="GET", body:Data?=nil, revision:Int?=nil,
+                                       source:String?=nil, after:String?=nil) async throws -> Data {
+        if let id {
+            guard UUID(uuidString:id) != nil else { throw URLError(.badURL) }
+        }
+        let query=[source.map{URLQueryItem(name:"source",value:$0)},after.map{URLQueryItem(name:"after",value:$0)}].compactMap{$0}
+        return try await request(["v1","records","saved-place"]+(id.map{[$0]} ?? []),method:method,
+                                 body:body,revision:revision,queryItems:query)
+    }
+
     private func ownPath(_ collection: String) throws -> [String] {
         guard let clientID else { throw URLError(.userAuthenticationRequired) }
         return ["v1","apps",clientID,"data",collection]
@@ -151,17 +171,17 @@ public struct XCenterDataClient {
     }
 
     private func request(_ parts: [String], method: String = "GET", body: Data? = nil, revision: Int? = nil,
-                         authenticated: Bool = true, query: URLQueryItem? = nil) async throws -> Data {
+                         authenticated: Bool = true, query: URLQueryItem? = nil, queryItems: [URLQueryItem] = []) async throws -> Data {
         guard parts.allSatisfy({ $0 != "." && $0 != ".." && $0.range(of:"^[A-Za-z0-9._-]{1,120}$",options:.regularExpression) != nil }),
               revision.map({$0 >= 0}) ?? true else { throw URLError(.badURL) }
         var url = URLComponents(url:Self.issuer,resolvingAgainstBaseURL:false)!
         url.path = "/" + parts.joined(separator:"/")
-        url.queryItems = query.map { [$0] }
+        url.queryItems = queryItems.isEmpty ? query.map { [$0] } : queryItems
         var request = URLRequest(url:url.url!)
         request.httpMethod = method
         request.httpShouldHandleCookies = false
         if authenticated {
-            guard let accessToken = try await token?(), !accessToken.hasPrefix("xid-db-"),
+            guard let accessToken = try await token?(), accessToken.hasPrefix("xid-db-") == service,
                   !accessToken.isEmpty, accessToken.range(of:"[^A-Za-z0-9_.~-]",options:.regularExpression) == nil else {
                 throw URLError(.userAuthenticationRequired)
             }

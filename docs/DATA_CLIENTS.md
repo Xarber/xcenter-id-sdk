@@ -1,6 +1,6 @@
 # X-Center ID data clients
 
-Start by [registering the app](integration.md). For platform differences and verification, see [API coverage](API_COVERAGE.md). Use the host's secure browser sign-in to get a user token. An app needs its own client registration even when using the same SDK as another app. Plain Node.js and Next.js use the same server module.
+Start by [registering the app](integration.md). For platform differences and verification, see [API coverage](API_COVERAGE.md). See [configuration and sign-in](CONFIGURATION.md) for `xid.json`, environment variables and explicit settings. Use the SDK’s secure browser sign-in to get a user token. An app needs its own client registration even when using the same SDK as another app. Plain Node.js and Next.js use the same server module.
 
 ## Choose the credential and feature
 
@@ -14,12 +14,12 @@ Start by [registering the app](integration.md). For platform differences and ver
 | Read a published collection from another app | `app_data` and live consent, both apps linked | Shared records |
 | Share own records with selected users | `app_data`, pass `readers` when writing | User records |
 | Public records | Anonymous reads. Verified app and explicit visibility on writes | Public client and records |
-| Create, list, edit and delete service-owned records | Verified app database key | Node service client |
+| Create, list, edit and delete service-owned records | Verified app database key | Node, Swift, JVM or Dart service client |
 | List and download account files and folders | `files_read` or `files_write` | User files |
 | Upload, rename, move and delete account files. Create, rename, move and delete empty folders | `files_write` | User files |
 | List and download incoming shared files | `shared_files_read` | User files |
-| Authorization code + PKCE, ID token validation, refresh rotation and device flow | Registered sign-in, confidential backend for device flow | Existing platform sign-in and Node OIDC |
-| Historical saved-place dataset | Confidential registration and `app_data` | Node migration client |
+| Authorization code + PKCE, ID token validation, refresh rotation and device flow | Registered sign-in, confidential backend for device flow | Public platform OAuth clients and confidential backend SDKs |
+| Historical saved-place dataset | Confidential registration and `app_data` | Backend migration client |
 
 Account settings, credentials, administrator actions, friends management, mailbox operations, app registration, private-app membership, cross-app grants, and database configuration use the hosted dashboard. An app token and a database key grant only their designated permissions. The mail UI and SMTP/IMAP use separate account credentials. There is no third-party account mutation or mail scope. X-Center ID currently does not advertise OAuth token revocation. To revoke live access, unlink the app in the dashboard. Product sign-out clears the product session and its saved credentials. Ending an issuer session alone does not replace grant revocation.
 
@@ -46,7 +46,7 @@ const saved = await user.records.get('notes', created.id);
 const files = await user.files.list();
 ```
 
-In Expo you can also import from `@authnjs/expo/client`. For plain HTML copy `packages/client/index.js` to your static assets and use a module script to import it. There is no React dependency. The web component stays in `@xcenter-id/web`. For confidential websites keep OAuth credentials and the actual token on your backend, and call your own authenticated product API from the browser. The provider source includes delegated file and public profile CORS. Deployments predating that change need same-origin application endpoints for those browser calls.
+In Expo you can also import from `@authnjs/expo/client`. For plain HTML copy `index.js`, `oauth.js`, and `config.js` from `packages/client` together to your static assets and use a module script to import it. There is no React dependency. The web component stays in `@xcenter-id/web`. For confidential websites keep OAuth credentials and the actual token on your backend, and call your own authenticated product API from the browser. The provider source includes delegated file and public profile CORS. Deployments predating that change need same-origin application endpoints for those browser calls.
 
 ```js
 import {createServiceClient} from '@xcenter-id/server/data';
@@ -64,7 +64,7 @@ Run Node.js 22 or later. Install all needed tarballs from the same SDK checkout 
 
 ```sh
 npm pack ./packages/client ./packages/server
-npm install ./xcenter-id-client-0.2.0.tgz ./xcenter-id-server-0.2.0.tgz
+npm install ./xcenter-id-client-0.3.0.tgz ./xcenter-id-server-0.3.0.tgz
 ```
 
 Use `createXCenterOIDC` from `@xcenter-id/server` for confidential browser callbacks. Save each transaction server-side and take it exactly once before `complete`. Keep session credentials separate for every account. To keep access tokens current, pass `createSessionTokenSource` to `getAccessToken`. Provide locked load/save and refresh adapters so all processes share one persisted refresh token. If a refresh response was lost, require a new sign-in instead of replaying the consumed token. Set `allowLoopback: true` only for a portal registration with an exact loopback callback.

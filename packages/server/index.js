@@ -1,3 +1,5 @@
+import {loadXCenterConfig} from './config.js';
+export {loadXCenterConfig} from './config.js';
 import * as oidc from 'openid-client';
 export * from './data.js';
 
@@ -20,7 +22,8 @@ export function validateCallback(value, redirect) {
   return url;
 }
 
-export async function createXCenterOIDC({ clientId, clientSecret, redirectUri, scopes = [], promptConsent = false, allowLoopback = false }) {
+export async function createXCenterOIDC(options) {
+  const {clientId,clientSecret,redirectUri,scopes,promptConsent,allowLoopback}=loadXCenterConfig(options);
   if (!clientId) throw new Error('Register the application in the Developer portal.');
   const candidate = new URL(redirectUri);
   const local = allowLoopback && candidate.protocol === 'http:' &&
@@ -94,6 +97,7 @@ export async function createXCenterOIDC({ clientId, clientSecret, redirectUri, s
       if (!claims?.sub || claims.nonce !== transaction.nonce) throw new Error('Invalid device sign-in identity.');
       return {tokens, identity:await oidc.fetchUserInfo(config,tokens.access_token,claims.sub)};
     },
+    issuerSignOutURL() { return new URL(issuer+'/session/end'); },
     async revoke(token, tokenTypeHint) {
       if (!metadata.revocation_endpoint) throw new Error('The issuer does not offer OAuth token revocation. Manage the grant in Linked apps.');
       await oidc.tokenRevocation(config,token,tokenTypeHint?{token_type_hint:tokenTypeHint}:undefined);

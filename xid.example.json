@@ -1,0 +1,5 @@
+{
+  "clientId": "your-registered-client-id",
+  "redirectUri": "https://your-app.example.org/callback",
+  "scopes": ["app_data", "friends", "offline_access"]
+}

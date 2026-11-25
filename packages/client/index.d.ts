@@ -58,3 +58,22 @@ export function createUserClient(options:{clientId:string;getAccessToken:()=>str
 export function createTransport(options?:{getAccessToken?:()=>string|Promise<string>;fetch?:typeof fetch}):
   (path:string,options?:Options & {method?:string;body?:Json;revision?:number;binary?:boolean})=>Promise<unknown>;
 export function createRecords(request:ReturnType<typeof createTransport>,clientId:string):Records;
+
+export const scopes: readonly ['openid','profile','email','age_range','app_data','friends','offline_access','files_read','files_write','shared_files_read'];
+export type PublicScope = (typeof scopes)[number];
+export interface OAuthTransaction {state:string;nonce:string;verifier:string;expiresAt:number}
+export interface PublicTokens {access_token:string;token_type:string;id_token?:string;refresh_token?:string;expires_in?:number;scope?:string}
+export function createPublicOAuthClient(options:PublicConfigOptions & {
+  fetch?:typeof fetch;crypto?:Crypto;verifyRS256?:(jwt:string,key:JsonWebKey)=>boolean|Promise<boolean>;now?:()=>number;
+}):{
+  begin(options?:{scopes?:readonly PublicScope[];promptConsent?:boolean}):Promise<{url:URL;transaction:OAuthTransaction}>;
+  complete(callback:string|URL,transaction:OAuthTransaction,options?:Options):Promise<{tokens:PublicTokens;identity:UserInfo}>;
+  refresh(refreshToken:string,subject:string,options?:Options):Promise<{tokens:PublicTokens;identity:UserInfo}>;
+  issuerSignOutURL():URL;
+};
+export interface PublicConfigOptions {
+  clientId?:string;redirectUri?:string;scopes?:readonly PublicScope[];
+  config?:Record<string,unknown>;env?:{XCENTER_CLIENT_ID?:string;XCENTER_REDIRECT_URI?:string};
+}
+export function publicConfig(options?:PublicConfigOptions):{clientId:string;redirectUri?:string;scopes:readonly PublicScope[]};
+export function loadPublicConfig(options?:PublicConfigOptions & {file?:string;fetch?:typeof fetch}):Promise<ReturnType<typeof publicConfig>>;

@@ -1,7 +1,10 @@
+import {loadXCenterConfig} from './config.js';
 import {createRecords, createTransport} from '@xcenter-id/client';
 export {createPublicClient, createUserClient, XCenterError} from '@xcenter-id/client';
 
-export function createServiceClient({clientId, databaseKey, fetch}) {
+export function createServiceClient(options) {
+  const {fetch,...settings}=options??{};
+  const {clientId,databaseKey}=loadXCenterConfig(settings);
   if (typeof clientId !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(clientId)) {
     throw new TypeError('Configure the registered client ID.');
   }
