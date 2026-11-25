@@ -34,6 +34,10 @@ The [SDK quality run](https://github.com/Xarber/xcenter-id-sdk/actions/runs/4563
 | ID | State | Work |
 | --- | --- | --- |
 | SDK-005 | Verified | Re-audited the production provider and all SDK entry points. [API coverage](API_COVERAGE.md) records the differences, and the JavaScript request test covers all the available operations. |
-| SDK-006 | Implemented | Add standalone server packages for Swift, JVM Kotlin and Dart. Cover confidential auth, token rotation, device authorization, service records and legacy migration while keeping server credentials out of native and web bundles. |
+| SDK-006 | Verified | Add standalone server packages for Swift, JVM Kotlin and Dart. Cover confidential auth, token rotation, device authorization, service records and legacy migration while keeping server credentials out of native and web bundles. |
 | SDK-007 | Implemented | Add native public-client OAuth exchange and renewal where supported, and verify authenticated data methods with a shared synthetic provider fixture on each target. Keep the existing product-backend handoff available. |
-| SDK-008 | Implemented | Configuration accepts explicit options, environment mappings and public or private `xid.json` according to the runtime. Tests cover precedence, rejection of secrets in public settings and a missing explicit file. |
+| SDK-008 | Verified | Configuration accepts explicit options, environment mappings and public or private `xid.json` according to the runtime. Tests cover precedence, rejection of secrets in public settings and a missing explicit file. |
+
+The [SDK quality run](https://github.com/Xarber/xcenter-id-sdk/actions/runs/45645817756) passed all four jobs for `61f2d07`. It covers Chromium and Node, SwiftPM and the iOS Simulator compile, Android and JVM builds, and Flutter and standalone Dart analysis and tests. The earlier run identified a Dart language-level regression in the shared file client. The correction preserves the package's supported language floor, and the replacement run passed.
+
+Strict Expo and JavaScript declarations, installed Node source packages, and locally signed Swift and Kotlin callback and refresh fixtures passed. CI verified the UADS manifest. Physical-device browser return and live authenticated native API writes remain open under SDK-007. The source release uses the existing production issuer. Live discovery and cross-origin token preflight passed, and the provider requires no rollout for the SDK changes.

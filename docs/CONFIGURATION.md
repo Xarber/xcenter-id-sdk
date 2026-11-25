@@ -46,7 +46,7 @@ Store the returned transaction with the product session, redirect the user to it
 | Node.js 22+ | `packages/server` | `createXCenterOIDC(options)`, `createServiceClient(options)` |
 | Swift on macOS | SwiftPM product `XCenterIDServer` | `XCenterServerConfig.load()`, then `identity()` and `records()` |
 | Kotlin/JVM 17+ | `packages/kotlin-server` | `XCenterConfig.load()`, then `identity()` and `records()` |
-| Standalone Dart | `packages/dart-server` | Import `package:xcenter_id_server/config.dart` and call `XCenterConfig.load()` |
+| Standalone Dart | `packages/dart-server` | Import `package:xcenter_id_server/config.dart`, call `XCenterConfig.load()`, then use `oauth()` and `records()` |
 | Next.js/Vercel | Same Node package | Use backend functions with protected environment variables |
 
 Server SDKs support beginning and completing device sign-in. Display the verification URL and short user code. Keep the polling transaction and device credential on the backend. Browser and native clients can ask their own service to start and follow approval without handling the confidential secret.

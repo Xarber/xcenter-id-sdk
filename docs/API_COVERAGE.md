@@ -1,6 +1,6 @@
 # API coverage by SDK and platform
 
-Audit dated 25 November 2026. Provider production revision `7124b6b` (0.17.0). Public SDK source reviewed at `ec394b7`. The parity update supersedes the initial SDK audit. This report distinguishes API methods from hosted flows and successful platform builds from authenticated runtime tests.
+Audit dated 25 November 2026. Provider production revision `7124b6b` (0.17.0). Public SDK parity update verified against source `61f2d07`. This report distinguishes API methods from hosted flows and successful platform builds from authenticated runtime tests.
 
 | Capability | Browser JS / Web Component | Expo | Swift | Kotlin | Flutter | Node.js |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -29,6 +29,7 @@ The delegated file upload endpoint accepts up to 2 MiB of nonempty data. Chunked
 - Live discovery returned ten supported scopes, the device authorization endpoint and an issuer end-session URL. It did not advertise token revocation.
 - Production returned CORS headers for discovery, public records and profiles, delegated files, shared files, friend lists and the signed-in avatar route. Unauthenticated delegated reads were denied. The deployment separately verified browser file preflight against production.
 - The shared JavaScript test covers the HTTP verb, path, query string and credential for every public, delegated and Node service data operation. Headless Chromium covers the browser write and Account Overview flows with synthetic data. The Expo entry point forwards to the same package.
-- The matched SDK CI run compiled Swift for macOS and iOS Simulator, assembled Android and analyzed/tested Flutter. The native method mapping is based on the Swift, Kotlin, and Dart source. The builds do not verify each authenticated operation on physical devices. [SDK CI run](https://github.com/Xarber/xcenter-id-sdk/actions/runs/45635778866)
+- Local Swift and JVM Kotlin fixture clients completed authorization code exchange and refresh with freshly signed RSA claims and verified the matching profile subject. Expo and JavaScript declarations passed a strict TypeScript check.
+- The [SDK quality workflow](https://github.com/Xarber/xcenter-id-sdk/actions/runs/45645817756) passed macOS and iOS Simulator builds, Android and JVM compilation, and Flutter and Dart analysis and tests.
 
 End-to-end OS handoff and authenticated live writes on physical devices require separate verification. Device start, credential handling, and API scopes are described in [configuration and sign-in](CONFIGURATION.md).
