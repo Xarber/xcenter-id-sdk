@@ -14,6 +14,8 @@
     "index.d.ts",
     "oauth.js",
     "config.js",
-    "LICENSE"
+    "LICENSE",
+    "session.js",
+    "session.d.ts"
   ]
 }

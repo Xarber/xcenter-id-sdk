@@ -87,7 +87,9 @@ public final class XCenterOAuth {
 
     public func complete(_ returned: URL, transaction: XCenterOAuthTransaction) async throws -> (tokens: [String:Any], identity: [String:Any]) {
         guard returned.scheme == redirectURI.scheme, returned.host == redirectURI.host,
-              returned.port == redirectURI.port, returned.path == redirectURI.path,
+              returned.port == redirectURI.port,
+              URLComponents(url:returned,resolvingAgainstBaseURL:false)?.percentEncodedPath ==
+                URLComponents(url:redirectURI,resolvingAgainstBaseURL:false)?.percentEncodedPath,
               returned.user == nil, returned.password == nil, returned.fragment == nil,
               transaction.expiresAt > Date(),
               [transaction.state,transaction.verifier,transaction.nonce].allSatisfy(validProof) else {

@@ -3,14 +3,16 @@ package it.xcenter.id
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import android.util.Base64
+import kotlin.io.encoding.Base64
 import org.json.JSONObject
 
 class XCenterHTTPException(val status: Int, val responseBody: ByteArray, val retryAfter: String?) :
     java.io.IOException("X-Center ID request failed (HTTP $status).")
 
 /** Blocking API. Call on an IO dispatcher or worker thread. */
-class XCenterDataClient(private val clientId: String? = null, private val accessToken: (() -> String)? = null) {
+class XCenterDataClient internal constructor(private val clientId: String?, private val accessToken: (() -> String)?,
+    private val transport: (DataRequest) -> ByteArray) {
+    constructor(clientId:String?=null,accessToken:(()->String)?=null) : this(clientId,accessToken,::sendConnection)
     companion object { const val ISSUER = "https://id.xcenter.it" }
 
     sealed interface RecordSpace {
@@ -54,7 +56,7 @@ class XCenterDataClient(private val clientId: String? = null, private val access
     fun uploadFile(name: String, content: ByteArray, folder: String? = null): ByteArray {
         require(content.size in 1..2*1024*1024) { "Choose a file from 1 byte to 2 MB." }
         return send("/v1/files","POST",JSONObject().put("name",name)
-            .put("content",Base64.encodeToString(content,Base64.NO_WRAP)).put("folder",folder ?: JSONObject.NULL))
+            .put("content",Base64.encode(content)).put("folder",folder ?: JSONObject.NULL))
     }
 
     /** Include {"folder":null} to move to the root. Supply {"name":"..."} to rename. */
@@ -87,36 +89,43 @@ class XCenterDataClient(private val clientId: String? = null, private val access
 
     private fun send(path: String, method: String = "GET", payload: JSONObject? = null,
                      revision: Long? = null, authenticated: Boolean = true): ByteArray {
-        // Android's HttpURLConnection supports PATCH on the target runtime.
-        val connection = URL(ISSUER + path).openConnection() as HttpURLConnection
-        try {
-            connection.instanceFollowRedirects = false
-            connection.useCaches = false
-            connection.requestMethod = method
-            connection.connectTimeout = 15_000
-            connection.readTimeout = 30_000
-            if (authenticated) {
-                val credential = requireNotNull(accessToken) { "Sign in first." }.invoke()
-                require(!credential.startsWith("xid-db-") && credential.matches(Regex("[A-Za-z0-9_.~-]+"))) { "Supply an end-user access token." }
-                connection.setRequestProperty("Authorization","Bearer $credential")
-            }
-            if (revision != null) {
-                require(revision >= 0)
-                connection.setRequestProperty("If-Match","\"$revision\"")
-            }
-            if (payload != null) {
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type","application/json")
-                connection.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val status = connection.responseCode
-            if (status !in 200..299) {
-                throw XCenterHTTPException(status,connection.errorStream?.use { it.readBytes() } ?: ByteArray(0),
-                    connection.getHeaderField("Retry-After"))
-            }
-            return connection.inputStream.use { it.readBytes() }
-        } finally {
-            connection.disconnect()
+        val headers=mutableMapOf<String,String>()
+        if (authenticated) {
+            val credential = requireNotNull(accessToken) { "Sign in first." }.invoke()
+            require(!credential.startsWith("xid-db-") && credential.matches(Regex("[A-Za-z0-9_.~-]+"))) { "Supply an end-user access token." }
+            headers["Authorization"]="Bearer $credential"
         }
+        if(revision!=null){
+            require(revision>=0)
+            headers["If-Match"]="\"$revision\""
+        }
+        if(payload!=null)headers["Content-Type"]="application/json"
+        return transport(DataRequest(ISSUER+path,method,headers,payload?.toString()?.encodeToByteArray()))
+    }
+}
+
+internal data class DataRequest(val url:String,val method:String,val headers:Map<String,String>,val body:ByteArray?)
+
+private fun sendConnection(request:DataRequest):ByteArray {
+    val connection = URL(request.url).openConnection() as HttpURLConnection
+    try {
+        connection.instanceFollowRedirects = false
+        connection.useCaches = false
+        connection.requestMethod = request.method
+        connection.connectTimeout = 15_000
+        connection.readTimeout = 30_000
+        request.headers.forEach { (name,value) -> connection.setRequestProperty(name,value) }
+        if (request.body != null) {
+            connection.doOutput = true
+            connection.outputStream.use { it.write(request.body) }
+        }
+        val status = connection.responseCode
+        if (status !in 200..299) {
+            throw XCenterHTTPException(status,connection.errorStream?.use { it.readBytes() } ?: ByteArray(0),
+                connection.getHeaderField("Retry-After"))
+        }
+        return connection.inputStream.use { it.readBytes() }
+    } finally {
+        connection.disconnect()
     }
 }

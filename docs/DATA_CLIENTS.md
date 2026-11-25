@@ -46,7 +46,7 @@ const saved = await user.records.get('notes', created.id);
 const files = await user.files.list();
 ```
 
-In Expo you can also import from `@authnjs/expo/client`. For plain HTML copy `index.js`, `oauth.js`, and `config.js` from `packages/client` together to your static assets and use a module script to import it. There is no React dependency. The web component stays in `@xcenter-id/web`. For confidential websites keep OAuth credentials and the actual token on your backend, and call your own authenticated product API from the browser. The provider source includes delegated file and public profile CORS. Deployments predating that change need same-origin application endpoints for those browser calls.
+In Expo you can also import from `@authnjs/expo/client`. For plain HTML copy `index.js`, `oauth.js`, `config.js`, and `session.js` from `packages/client` together to your static assets and use a module script to import it. There is no React dependency. The web component stays in `@xcenter-id/web`. For confidential websites keep OAuth credentials and the actual token on your backend, and call your own authenticated product API from the browser. The provider source includes delegated file and public profile CORS. Deployments predating that change need same-origin application endpoints for those browser calls.
 
 ```js
 import {createServiceClient} from '@xcenter-id/server/data';

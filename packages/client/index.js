@@ -134,3 +134,5 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
 export {createPublicOAuthClient, scopes} from "./oauth.js";
 
 export {loadPublicConfig, publicConfig} from "./config.js";
+
+export {createSessionTokenSource} from "./session.js";

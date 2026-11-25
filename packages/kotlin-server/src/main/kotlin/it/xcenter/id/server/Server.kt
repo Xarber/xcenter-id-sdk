@@ -125,3 +125,21 @@ class XCenterSavedPlaces(private val accessToken:()->String) {
         } finally { connection.disconnect() }
     }
 }
+
+/** Creates the public or delegated data client with the JVM HTTP transport, including PATCH. */
+fun createDataClient(clientId:String?=null,accessToken:(()->String)?=null):it.xcenter.id.XCenterDataClient {
+    val client=java.net.http.HttpClient.newBuilder()
+        .followRedirects(java.net.http.HttpClient.Redirect.NEVER)
+        .connectTimeout(java.time.Duration.ofSeconds(15)).build()
+    return it.xcenter.id.XCenterDataClient(clientId,accessToken) { message ->
+        val request=java.net.http.HttpRequest.newBuilder(URI.create(message.url))
+            .timeout(java.time.Duration.ofSeconds(30))
+            .method(message.method,message.body?.let(java.net.http.HttpRequest.BodyPublishers::ofByteArray)
+                ?: java.net.http.HttpRequest.BodyPublishers.noBody())
+        message.headers.forEach { (name,value) -> request.header(name,value) }
+        val response=client.send(request.build(),java.net.http.HttpResponse.BodyHandlers.ofByteArray())
+        if(response.statusCode() !in 200..299)throw it.xcenter.id.XCenterHTTPException(
+            response.statusCode(),response.body(),response.headers().firstValue("Retry-After").orElse(null))
+        response.body()
+    }
+}

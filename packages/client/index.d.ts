@@ -77,3 +77,5 @@ export interface PublicConfigOptions {
 }
 export function publicConfig(options?:PublicConfigOptions):{clientId:string;redirectUri?:string;scopes:readonly PublicScope[]};
 export function loadPublicConfig(options?:PublicConfigOptions & {file?:string;fetch?:typeof fetch}):Promise<ReturnType<typeof publicConfig>>;
+
+export {createSessionTokenSource, type SessionTokens} from "./session.js";

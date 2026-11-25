@@ -54,9 +54,12 @@ test('plain browser client writes a record without framework code or cookies', {
   try {
     const page = await browser.newPage();
     await page.route(origin+'/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>SDK fixture</title>'}));
-    await page.route(origin+'/client.js',async route=>route.fulfill({
-      contentType:'text/javascript',body:await readFile(new URL('../packages/client/index.js',import.meta.url)),
-    }));
+    for (const path of ['index.js','oauth.js','config.js','session.js']) {
+      await page.route(origin+'/'+path,async route=>route.fulfill({
+        contentType:'text/javascript',
+        body:await readFile(new URL('../packages/client/'+path,import.meta.url)),
+      }));
+    }
     await page.route('https://id.xcenter.it/v1/apps/fixture/data/notes/one',route=>{
       const request=route.request(),headers=request.headers();
       if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:{
@@ -71,7 +74,7 @@ test('plain browser client writes a record without framework code or cookies', {
     });
     await page.goto(origin);
     const result=await page.evaluate(async()=>{
-      const sdk=await import('/client.js');
+      const sdk=await import('/index.js');
       const user=sdk.createUserClient({clientId:'fixture',getAccessToken:()=> 'synthetic-token'});
       return user.records.put('notes','one',{data:{title:'Browser fixture'},public:false},{revision:0});
     });
