@@ -1,6 +1,6 @@
 # X-Center ID data clients
 
-Start by [registering the app](integration.md). Use the host's secure browser sign-in to get a user token. An app needs its own client registration even when using the same SDK as another app. Plain Node.js and Next.js use the same server module.
+Start by [registering the app](integration.md). For platform differences and verification, see [API coverage](API_COVERAGE.md). Use the host's secure browser sign-in to get a user token. An app needs its own client registration even when using the same SDK as another app. Plain Node.js and Next.js use the same server module.
 
 ## Choose the credential and feature
 

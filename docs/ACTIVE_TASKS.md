@@ -27,3 +27,12 @@ The [endpoint and scope matrix](DATA_CLIENTS.md) was validated against the provi
 Node and Chromium tests passed, including a plain browser record write and the unchanged Account Overview flow. Source package dry runs for client, server, Web Components and Expo passed. The next check is the SDK GitHub quality workflow on the same source, then any fixes identified by platform tests.
 
 The [SDK quality run](https://github.com/Xarber/xcenter-id-sdk/actions/runs/45635778866) passed web, Swift, Android and Flutter for source commit `688866b`. TypeScript declarations and the Expo re-export passed a strict local check. Local Swift data source type-checking passed. The local full build lacked the SwiftUI macro plug-in in Command Line Tools, and the complete macOS/iOS build passed with Xcode on CI. Provider-side isolated tests and Chromium passed callback approval and credential claiming. Installed-device execution and provider deployment are outside this source verification.
+
+
+### Full platform parity follow-up
+
+| ID | State | Work |
+| --- | --- | --- |
+| SDK-005 | Verified | Re-audited the production provider and all SDK entry points. [API coverage](API_COVERAGE.md) records the differences, and the JavaScript request test covers all the available operations. |
+| SDK-006 | Queued | Add standalone server packages for Swift, JVM Kotlin and Dart. Cover confidential auth, token rotation, device authorization, service records and legacy migration while keeping server credentials out of native and web bundles. |
+| SDK-007 | Queued | Add native public-client OAuth exchange and renewal where supported, and verify authenticated data methods with a shared synthetic provider fixture on each target. Keep the existing product-backend handoff available. |

@@ -4,6 +4,7 @@ The packages provide account settings surfaces and secure sign-in integration fo
 
 - [Active SDK tasks](ACTIVE_TASKS.md)
 - [Data clients and backend SDK](DATA_CLIENTS.md)
+- [API coverage by SDK and platform](API_COVERAGE.md)
 
 - [Register and integrate](integration.md)
 - [Scopes, permissions and data APIs](capabilities.md)
