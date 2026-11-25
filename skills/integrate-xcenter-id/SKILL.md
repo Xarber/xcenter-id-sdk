@@ -27,3 +27,7 @@ Bind code exchange and login completion to a single-use transaction created befo
 Verify cancellation, callback failure, process restart, wrong client, wrong callback, wrong PKCE verifier, replay, pending/revoked registration and unauthorized data access. Only report installation or device sign-in when actually executed. Document the installed files, portal identity, tested platforms and remaining activation steps in the target project. Registering a relying-party app does not authorize publishing it or changing another app.
 
 Read the [capability reference](references/capabilities.md) to implement profile and email claims, required permissions, friend import, verified app storage, public data, and cross-app sharing. Use the dashboard for user-owned account management.
+
+For actual reads and writes use the [data client and backend SDK guide](https://github.com/Xarber/xcenter-id-sdk/blob/testing/docs/DATA_CLIENTS.md). Use a user token for delegated data, an anonymous client for public records, and a verified-app database key on the backend. Plain Node.js can handle the OAuth callback and app storage without React or Next.js.
+
+If the portal shows that an administrator approved the registered callback URLs, have the registration owner confirm identity and use **Get client ID and secret** or **Get client ID** for a public native app. The approval covers those exact URLs. It does not replace the operating system’s app-link associations or enable the app badge and service database.

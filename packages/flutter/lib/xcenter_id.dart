@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 export 'browser_sign_in.dart';
+export 'data_client.dart';
 
 class OverviewProfile {
   final String name;

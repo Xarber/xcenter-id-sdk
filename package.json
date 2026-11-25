@@ -5,7 +5,8 @@
   "type": "module",
   "workspaces": [
     "packages/web",
-    "packages/server"
+    "packages/server",
+    "packages/client"
   ],
   "scripts": {
     "test": "node --test"

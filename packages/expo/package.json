@@ -1,6 +1,6 @@
 {
   "name": "@authnjs/expo",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "AGPL-3.0-only",
   "type": "module",
   "main": "./index.tsx",
@@ -14,7 +14,8 @@
     "managed-signin-urls.ts",
     "assets",
     "registered-signin.tsx",
-    "account-overview.tsx"
+    "account-overview.tsx",
+    "client.ts"
   ],
   "peerDependencies": {
     "react": "^19.0.0",
@@ -27,7 +28,8 @@
     ".": "./index.tsx",
     "./authorize-native": "./authorize-native.ts",
     "./registered-signin": "./registered-signin.tsx",
-    "./account-overview": "./account-overview.tsx"
+    "./account-overview": "./account-overview.tsx",
+    "./client": "./client.ts"
   },
   "peerDependenciesMeta": {
     "expo-auth-session": {
@@ -39,5 +41,8 @@
     "expo-web-browser": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "@xcenter-id/client": "0.2.0"
   }
 }

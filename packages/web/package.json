@@ -1,7 +1,17 @@
 {
   "name": "@xcenter-id/web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "license": "AGPL-3.0-only",
-  "exports": {".": "./account-overview.js", "./urls": "./urls.js"}
+  "exports": {
+    ".": "./account-overview.js",
+    "./urls": "./urls.js",
+    "./client": {
+      "types": "./client.d.ts",
+      "default": "./client.js"
+    }
+  },
+  "dependencies": {
+    "@xcenter-id/client": "0.2.0"
+  }
 }

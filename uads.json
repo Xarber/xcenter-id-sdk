@@ -20,7 +20,9 @@
     "accountOverview": "implemented",
     "registeredBrowserSignIn": "implemented",
     "proofBoundIOSPickupAdapter": "implemented",
-    "webOIDCAdapter": "implemented"
+    "webOIDCAdapter": "implemented",
+    "delegatedDataClients": "implemented",
+    "serverDatabaseClient": "implemented"
   },
   "distribution": {
     "github": "source"

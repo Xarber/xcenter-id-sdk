@@ -21,3 +21,5 @@ Add X-Center ID to your app's Settings. A single **AccountOverview** shows a sig
 For agent-assisted setup, install the [Integrate X-Center ID skill](skills/integrate-xcenter-id) from this repository.
 
 The source is distributed through this repository. Packages have stack-specific compatibility requirements and validation status in [Testing](docs/TESTING.md). Project code is AGPL-3.0-only. See [LICENSE](LICENSE).
+
+Use the [data client and backend SDK guide](docs/DATA_CLIENTS.md) for API requests, storage writes, files, friends, and plain Node.js services.

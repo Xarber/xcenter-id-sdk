@@ -1,0 +1,7 @@
+{
+  "name": "@xcenter-id/client",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "exports": {".": {"types":"./index.d.ts","default":"./index.js"}}
+}

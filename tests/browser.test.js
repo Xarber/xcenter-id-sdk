@@ -48,3 +48,33 @@ test('phone account card signs in, shows profile, opens details and signs out', 
     await page.getByRole('button', { name: 'Continue with X-Center ID' }).waitFor();
   } finally { await browser.close(); }
 });
+
+test('plain browser client writes a record without framework code or cookies', { skip: !executablePath }, async () => {
+  const browser = await chromium.launch({executablePath,headless:true});
+  try {
+    const page = await browser.newPage();
+    await page.route(origin+'/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>SDK fixture</title>'}));
+    await page.route(origin+'/client.js',async route=>route.fulfill({
+      contentType:'text/javascript',body:await readFile(new URL('../packages/client/index.js',import.meta.url)),
+    }));
+    await page.route('https://id.xcenter.it/v1/apps/fixture/data/notes/one',route=>{
+      const request=route.request(),headers=request.headers();
+      if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:{
+        'access-control-allow-origin':'*','access-control-allow-methods':'PUT, OPTIONS',
+        'access-control-allow-headers':'Authorization, Content-Type, If-Match',
+      }});
+      if(request.method()!=='PUT'||headers.authorization!=='Bearer synthetic-token'||
+          headers['if-match']!=='"0"'||headers.cookie||request.postDataJSON().public!==false){
+        return route.fulfill({status:403,headers:{'access-control-allow-origin':'*'},json:{error:'Unexpected request'}});
+      }
+      return route.fulfill({headers:{'access-control-allow-origin':'*'},json:{id:'one',revision:1,public:false}});
+    });
+    await page.goto(origin);
+    const result=await page.evaluate(async()=>{
+      const sdk=await import('/client.js');
+      const user=sdk.createUserClient({clientId:'fixture',getAccessToken:()=> 'synthetic-token'});
+      return user.records.put('notes','one',{data:{title:'Browser fixture'},public:false},{revision:0});
+    });
+    if(result.id!=='one'||result.revision!==1)throw new Error('Unexpected write result');
+  }finally{await browser.close();}
+});

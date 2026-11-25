@@ -1,9 +1,27 @@
 {
   "name": "@xcenter-id/server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "license": "AGPL-3.0-only",
-  "engines": {"node": ">=22"},
-  "exports": {".": "./index.js"},
-  "dependencies": {"openid-client": "^6.8.4"}
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./data": {
+      "types": "./data.d.ts",
+      "default": "./data.js"
+    },
+    "./refresh": {
+      "types": "./refresh.d.ts",
+      "default": "./refresh.js"
+    }
+  },
+  "dependencies": {
+    "openid-client": "^6.8.4",
+    "@xcenter-id/client": "0.2.0"
+  }
 }
