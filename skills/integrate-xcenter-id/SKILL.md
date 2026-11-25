@@ -28,6 +28,6 @@ Verify cancellation, callback failure, process restart, wrong client, wrong call
 
 Read the [capability reference](references/capabilities.md) to implement profile and email claims, required permissions, friend import, verified app storage, public data, and cross-app sharing. Use the dashboard for user-owned account management.
 
-For actual reads and writes use the [data client and backend SDK guide](https://github.com/Xarber/xcenter-id-sdk/blob/testing/docs/DATA_CLIENTS.md). Use a user token for delegated data, an anonymous client for public records, and a verified-app database key on the backend. Plain Node.js can handle the OAuth callback and app storage without React or Next.js.
+For actual reads and writes use the [data client and backend SDK guide](https://github.com/Xarber/xcenter-id-sdk/blob/main/docs/DATA_CLIENTS.md). Use a user token for delegated data, an anonymous client for public records, and a verified-app database key on the backend. Plain Node.js can handle the OAuth callback and app storage without React or Next.js.
 
 If the portal shows that an administrator approved the registered callback URLs, have the registration owner confirm identity and use **Get client ID and secret** or **Get client ID** for a public native app. The approval covers those exact URLs. It does not replace the operating system’s app-link associations or enable the app badge and service database.
