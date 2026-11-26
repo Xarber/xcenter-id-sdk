@@ -231,3 +231,20 @@ test('app files use private container routes and distinguish user and service cr
   await service.files.delete(id);
   assert.ok(calls.every(([path,request])=>path.startsWith('/v1/apps/backup/files')&&request.headers.Authorization==='Bearer '+key));
 });
+
+test('stock PeerJS lease operations send the account token only to the session API', async () => {
+  const calls=[];
+  const user=createUserClient({clientId:'fixture',getAccessToken:()=> 'user-token',fetch:async (url,request)=>{
+    calls.push({path:new URL(url).pathname,...request});
+    return Response.json({key:'fixture-key'});
+  }});
+  const lease=await user.peers.openPeerJS({discoverable:true,id:'Fixture'});
+  await user.peers.renewPeerJS(lease);
+  await user.peers.closePeerJS(lease);
+  assert.deepEqual(calls.map(call=>[call.path,call.method,JSON.parse(call.body)]),[
+    ['/v1/peers/peerjs/session','POST',{discoverable:true,id:'Fixture'}],
+    ['/v1/peers/peerjs/session','PUT',{key:'fixture-key'}],
+    ['/v1/peers/peerjs/session','DELETE',{key:'fixture-key'}],
+  ]);
+  assert.ok(calls.every(call=>call.headers.Authorization==='Bearer user-token'));
+});

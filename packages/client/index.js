@@ -149,7 +149,11 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
   const files = '/v1/files', folders = files + '/folders', shared = files + '/shared';
   const transfer=createFileTransfers(request,files);
   const routeFor=(peer,action='')=>'/v1/peers/'+segment(peer.id,24)+(action?'/'+action:'');
+  const peerJS='/v1/peers/peerjs/session';
   const peers={
+    openPeerJS: (settings,{signal}={})=>request(peerJS,{method:'POST',body:settings,signal}),
+    renewPeerJS: (session,{signal}={})=>request(peerJS,{method:'PUT',body:{key:session.key},signal}),
+    closePeerJS: (session,{signal}={})=>request(peerJS,{method:'DELETE',body:{key:session.key},signal}),
     open: (settings,{signal}={})=>request('/v1/peers',{method:'POST',body:settings,signal}),
     list: (peer,{signal}={})=>request(routeFor(peer,'directory'),{peerProof:peer.proof,signal}),
     receive: (peer,{signal}={})=>request(routeFor(peer,'messages'),{peerProof:peer.proof,signal}),

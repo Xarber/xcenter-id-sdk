@@ -48,3 +48,40 @@ From a user-initiated button on a supported browser, call `navigator.mediaDevice
 After the receiving user accepts a file, declare its bounded size and name using your own protocol, then call `await sendPeerFile(channel, file, {signal, onProgress})` on an open, reliable, ordered data channel. The helper sends bounded binary chunks with backpressure. Use a dedicated channel or serialize files, set `binaryType = "arraybuffer"`, enforce the declared byte count and receiver’s file-size limit, and write to a user-approved destination. Discard incomplete transfers. Treat file names and content as untrusted. The progress callback reports bytes queued locally. Use a receiver acknowledgment to confirm completed writes. Audio, video and file bytes travel through WebRTC. X-Center ID handles signaling only. TURN may relay encrypted traffic when direct transport is unavailable.
 
 [X-Center ID peer discovery reference](https://id.xcenter.it/docs/sdk/list-peers)
+
+## Unmodified PeerJS
+
+X-Center also accepts the stock PeerJS 1.5.5 client. This transport uses the same app-level Peer connections and discovery settings. PeerJS sessions discover and connect with other PeerJS sessions in the registration. Use the X-Center browser adapter separately for its own signaling protocol.
+
+```js
+import {Peer} from "peerjs";
+
+const lease = await user.peers.openPeerJS({discoverable: true});
+const peer = new Peer(lease.id, {
+  host: "id.xcenter.it",
+  port: 443,
+  secure: true,
+  path: lease.path,
+  key: lease.key,
+  token: lease.token,
+  config: {iceServers: appIceServers},
+});
+
+peer.on("open", () => peer.listAllPeers(showSameAppPeers));
+peer.on("call", async call => {
+  const approved = await askToAnswer(call.peer);
+  if (approved) call.answer(await openApprovedMedia());
+  else call.close();
+});
+
+// Renew during active use, before the current access token and lease expire.
+await user.peers.renewPeerJS(lease);
+
+// On sign-out or leaving the feature:
+peer.destroy();
+await user.peers.closePeerJS(lease);
+```
+
+The first WebSocket must connect within 60 seconds. After connection, renew the lease during active use, for example every five minutes, using a current user access token. `getAccessToken` should refresh the access token as needed. After a transient disconnect, use `peer.reconnect()` while the existing lease is valid. Obtain a new lease after expiry or server restart. An optional `id` can be requested when opening a lease. IDs are unique within an app. Keep the lease key and socket proof out of logs, analytics and URLs you share with users. The normal X-Center access token goes only in the Authorization header on the session endpoint.
+
+Calls, media tracks and data serialization use the stock client's APIs. For screen sharing, pass an approved display stream from `getDisplayMedia()` to `peer.call()`. Use a data connection for binary chunks, and let the receiving user accept a file and enforce size limits before writing it. Configure ICE servers for the networks you support.

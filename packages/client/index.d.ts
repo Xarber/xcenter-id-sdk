@@ -54,6 +54,7 @@ export interface UserAppFiles extends ContainerFiles<AppUpload> {
   setBrowseable(id:string,browseable:boolean,options?:Options):Promise<{ok:true}>;
 }
 export interface PeerSession {id:string;proof:string;expiresIn:number}
+export interface PeerJSSession {id:string;key:string;token:string;path:string;connectWithin:number}
 export type PeerMessageType = 'offer' | 'answer' | 'candidate' | 'hangup';
 export interface PeerMessage {type:PeerMessageType;data:{[key:string]:Json}}
 export interface AccountSummary {storage:{used:number;capacity:number};connectedApps:number}
@@ -69,6 +70,9 @@ export interface UserClient {
   };
   accountOverview(options?:Options):Promise<AccountSummary>;
   peers:{
+    openPeerJS(settings:{discoverable:boolean;id?:string},options?:Options):Promise<PeerJSSession>;
+    renewPeerJS(session:Pick<PeerJSSession,'key'>,options?:Options):Promise<{ok:true}>;
+    closePeerJS(session:Pick<PeerJSSession,'key'>,options?:Options):Promise<{ok:true}>;
     open(settings:{discoverable:boolean},options?:Options):Promise<PeerSession>;
     list(peer:PeerSession,options?:Options):Promise<{peers:string[]}>;
     receive(peer:PeerSession,options?:Options):Promise<{messages:(PeerMessage & {from:string})[]}>;
