@@ -155,11 +155,16 @@ public struct XCenterDataClient {
         try await request(appFilePath([id]),method:"DELETE")
     }
     public func setAppFileBrowseable(_ id:String,browseable:Bool) async throws -> Data {
-        guard !service else { throw URLError(.userAuthenticationRequired) }
-        return try await request(appFilePath([id]),method:"PUT",body:JSONEncoder().encode(["browseable":browseable]))
+        try await setAppFileVisibility(id,browseable:browseable)
     }
-    public func startAppUpload(name:String,size:Int64,browseable:Bool = false) async throws -> Data {
-        let body:[String:Any] = ["name":name,"size":size,"browseable":browseable]
+    public func setAppFileVisibility(_ id:String,browseable:Bool,editable:Bool? = nil) async throws -> Data {
+        guard !service else { throw URLError(.userAuthenticationRequired) }
+        var body = ["browseable":browseable]
+        if let editable { body["editable"] = editable }
+        return try await request(appFilePath([id]),method:"PUT",body:JSONEncoder().encode(body))
+    }
+    public func startAppUpload(name:String,size:Int64,browseable:Bool = false,editable:Bool = false) async throws -> Data {
+        let body:[String:Any] = ["name":name,"size":size,"browseable":browseable,"editable":editable]
         return try await request(appFilePath(["uploads"]),method:"POST",body:JSONSerialization.data(withJSONObject:body))
     }
     public func appUploadStatus(_ id:String) async throws -> Data {

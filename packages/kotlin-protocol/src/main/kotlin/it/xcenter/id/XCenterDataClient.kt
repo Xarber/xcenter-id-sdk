@@ -61,9 +61,11 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
     fun downloadAppFile(id: String) = send("$appFiles/${segment(id,36)}")
     fun deleteAppFile(id: String) = send("$appFiles/${segment(id,36)}","DELETE")
     fun setAppFileBrowseable(id: String, browseable: Boolean) =
-        send("$appFiles/${segment(id,36)}","PUT",JSONObject().put("browseable",browseable))
-    fun startAppUpload(name: String, size: Long, browseable: Boolean = false) =
-        send("$appFiles/uploads","POST",JSONObject().put("name",name).put("size",size).put("browseable",browseable))
+        setAppFileVisibility(id,browseable)
+    fun setAppFileVisibility(id: String, browseable: Boolean, editable: Boolean? = null) =
+        send("$appFiles/${segment(id,36)}","PUT",JSONObject().put("browseable",browseable).putOpt("editable",editable))
+    fun startAppUpload(name: String, size: Long, browseable: Boolean = false, editable: Boolean = false) =
+        send("$appFiles/uploads","POST",JSONObject().put("name",name).put("size",size).put("browseable",browseable).put("editable",editable))
     fun appUploadStatus(id: String) = send("$appFiles/uploads/${segment(id,36)}")
     fun appendAppUpload(id: String, position: Long, content: ByteArray) =
         send("$appFiles/uploads/${segment(id,36)}","PUT",JSONObject().put("position",position).put("content",Base64.encode(content)))

@@ -40,9 +40,9 @@ export interface FileTransfers<File> {
   complete(id:string,options?:Options):Promise<{id:string}>;
   cancel(id:string,options?:Options):Promise<{ok:true}>;
 }
-export type AppUpload = {name:string;size:number;browseable?:boolean};
+export type AppUpload = {name:string;size:number;browseable?:boolean;editable?:boolean};
 export type ServiceUpload = {name:string;size:number};
-export type AppFileEntry = FileEntry & {browseable:boolean};
+export type AppFileEntry = FileEntry & {browseable:boolean;editable:boolean};
 export interface ContainerFiles<File> {
   transfers:FileTransfers<File>;
   uploadChunks(file:File,readChunk:(offset:number,length:number)=>string|Promise<string>,options?:Options & {id?:string;onProgress?:(progress:UploadProgress)=>void}):Promise<{id:string}>;
@@ -51,6 +51,7 @@ export interface ContainerFiles<File> {
   delete(id:string,options?:Options):Promise<{ok:true}>;
 }
 export interface UserAppFiles extends ContainerFiles<AppUpload> {
+  setVisibility(id:string,visibility:{browseable:boolean;editable?:boolean},options?:Options):Promise<{ok:true}>;
   setBrowseable(id:string,browseable:boolean,options?:Options):Promise<{ok:true}>;
 }
 export interface PeerSession {id:string;proof:string;expiresIn:number}

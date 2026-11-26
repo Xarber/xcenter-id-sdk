@@ -1,6 +1,6 @@
 {
   "name": "@xcenter-id/server",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "license": "AGPL-3.0-only",
   "engines": {
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "openid-client": "^6.8.4",
-    "@xcenter-id/client": "0.6.0"
+    "@xcenter-id/client": "0.7.0"
   },
   "files": [
     "index.js",

@@ -134,8 +134,8 @@ export function createAppFiles(request,clientId,service=false) {
     download:(id,{signal}={})=>request(filePath(files,id),{signal,binary:true}),
     delete:(id,{signal}={})=>request(filePath(files,id),{method:'DELETE',signal}),
   };
-  return service?store:{...store,setBrowseable:(id,browseable,{signal}={})=>
-    request(filePath(files,id),{method:'PUT',body:{browseable},signal})};
+  const setVisibility=(id,visibility,{signal}={})=>request(filePath(files,id),{method:'PUT',body:visibility,signal});
+  return service?store:{...store,setVisibility,setBrowseable:(id,browseable,options)=>setVisibility(id,{browseable},options)};
 }
 
 export function createUserClient({clientId, getAccessToken, fetch} = {}) {

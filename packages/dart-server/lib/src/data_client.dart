@@ -67,9 +67,11 @@ class XCenterDataClient {
   Future<Uint8List> downloadAppFile(String id) => _send('$_appFiles/${_segment(id,36)}');
   Future<Uint8List> deleteAppFile(String id) => _send('$_appFiles/${_segment(id,36)}',method:'DELETE');
   Future<Uint8List> setAppFileBrowseable(String id,bool browseable) =>
-      _send('$_appFiles/${_segment(id,36)}',method:'PUT',body:{'browseable':browseable});
-  Future<Uint8List> startAppUpload(String name,int size,{bool browseable=false}) =>
-      _send('$_appFiles/uploads',method:'POST',body:{'name':name,'size':size,'browseable':browseable});
+      setAppFileVisibility(id,browseable:browseable);
+  Future<Uint8List> setAppFileVisibility(String id,{required bool browseable,bool? editable}) =>
+      _send('$_appFiles/${_segment(id,36)}',method:'PUT',body:{'browseable':browseable,if(editable!=null)'editable':editable});
+  Future<Uint8List> startAppUpload(String name,int size,{bool browseable=false,bool editable=false}) =>
+      _send('$_appFiles/uploads',method:'POST',body:{'name':name,'size':size,'browseable':browseable,'editable':editable});
   Future<Uint8List> appUploadStatus(String id) => _send('$_appFiles/uploads/${_segment(id,36)}');
   Future<Uint8List> appendAppUpload(String id,int position,Uint8List content) =>
       _send('$_appFiles/uploads/${_segment(id,36)}',method:'PUT',body:{'position':position,'content':base64Encode(content)});
