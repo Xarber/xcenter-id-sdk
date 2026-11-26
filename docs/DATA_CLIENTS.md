@@ -25,7 +25,7 @@ Account settings, credentials, administrator actions, friends management, mailbo
 
 Hosted records require explicit `public` on every write. Put with revision 0 to create. Read an existing record before replacing or deleting it, and send its returned revision. Only retry a stale write after dealing with the conflicting change. Continue list requests with the server's `nextCursor`. Developer-controlled sharing allows reads of the current user's source records, subject to consent. It does not expose the service database.
 
-Delegated uploads are inline base64, from 1 byte to 2 MiB. Use the dashboard for larger or empty files, recursive deletion, changing access to shared files, and capacity or usage management. File download methods return the bytes or a binary response. Manage images with a native image loader or a browser object URL, and release temporary files and object URLs after use. Treat downloaded content as untrusted.
+The inline base64 upload supports 1 byte to 2 MiB. Use the [resumable transfer API](ACCOUNT_AND_PEER_APIS.md#quota-limited-file-transfer) for files up to the account’s remaining quota. The dashboard handles recursive deletion, shared-file access changes, and capacity management. File download methods return the bytes or a binary response. Manage images with a native image loader or a browser object URL, and release temporary files and object URLs after use. Treat downloaded content as untrusted.
 
 ## JavaScript, Expo and plain Node.js
 

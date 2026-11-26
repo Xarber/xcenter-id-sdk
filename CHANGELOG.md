@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 · 2026-11-26
+
+- Added quota-based resumable uploads and shared signaling for verified apps.
+- Added delegated account overview and settings for trusted apps with explicit user consent.
+
 ## 0.3.0 · 2026-11-25
 
 - Added public OAuth exchange, signed identity validation and token rotation for registered browser and native apps.

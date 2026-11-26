@@ -123,6 +123,15 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
   };
   return {
     peers,
+    account: {
+      visibility: ({signal}={})=>request('/v1/account/profile-visibility',{signal}),
+      updateVisibility: (fields,{signal}={})=>request('/v1/account/profile-visibility',{method:'PUT',body:{fields},signal}),
+      apps: ({signal}={})=>request('/v1/account/apps',{signal}),
+      permissions: (client,{signal}={})=>request('/v1/account/apps/'+segment(client,100)+'/permissions',{signal}),
+      disablePermission: (client,scope,{signal}={})=>request('/v1/account/apps/'+segment(client,100)+'/permissions',
+        {method:'PUT',body:{scope,enabled:false},signal}),
+    },
+    accountOverview: ({signal}={}) => request('/v1/account/overview',{signal}),
     userInfo: ({signal} = {}) => request('/me', {signal}),
     avatar: ({signal} = {}) => request('/v1/profile/avatar', {signal, binary:true}),
     friends: ({signal} = {}) => request('/v1/profile/friends', {signal}),

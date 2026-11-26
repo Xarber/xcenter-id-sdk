@@ -4,7 +4,7 @@ import * as oidc from 'openid-client';
 export * from './data.js';
 
 export const issuer = 'https://id.xcenter.it';
-const supportedScopes = new Set(['openid', 'profile', 'email', 'age_range', 'app_data', 'friends', 'offline_access', 'files_read', 'files_write', 'shared_files_read']);
+const supportedScopes = new Set(['openid', 'profile', 'email', 'age_range', 'app_data', 'friends', 'offline_access', 'files_read', 'files_write', 'shared_files_read', 'account_overview', 'account_manage']);
 
 export function redirectURL(value) {
   const url = new URL(value);

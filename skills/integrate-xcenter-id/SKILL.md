@@ -34,3 +34,9 @@ For actual reads and writes use the [data client and backend SDK guide](https://
 If the portal shows that an administrator approved the registered callback URLs, have the registration owner confirm identity and use **Get client ID and secret** or **Get client ID** for a public native app. The approval covers those exact URLs. It does not replace the operating system’s app-link associations or enable the app badge and service database.
 
 Use the SDK’s [configuration and sign-in guide](https://github.com/Xarber/xcenter-id-sdk/blob/main/docs/CONFIGURATION.md) for explicit settings, environment variables, and `xid.json`. Use a distinct public configuration file for a mobile or browser bundle. Put confidential OAuth and service database secrets into protected server configuration. Save only sessions whose callback and issuer identity the SDK validated.
+
+## Administrative app scopes, larger files and peers
+
+See the [SDK transport and account guide](https://github.com/Xarber/xcenter-id-sdk/blob/main/docs/ACCOUNT_AND_PEER_APIS.md) for calls in all supported SDK languages. Ask for `account_overview` or `account_manage` only if an administrator designated this registration as a trusted Administration app and the feature needs it. The user selects these under **Administrative App Permissions** and must explicitly confirm management access. Use scoped account APIs directly from the signed-in app. Account sign-in and new consent still use the supported issuer sign-in flow. Storage totals, public-profile visibility, and linked app access are the supported controls. Keep passwordless credentials and operator actions in X-Center ID.
+
+Use resumable file transfers with `files_write` when files exceed the inline upload size. Account quota governs available storage. Verified apps can opt into WebRTC signaling from Developer Apps and may enable an app-scoped peer directory.

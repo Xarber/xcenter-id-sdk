@@ -9,7 +9,7 @@ export interface ServerConfigOptions {
 export function loadXCenterConfig(options?:ServerConfigOptions):ServerConfigOptions & {clientId:string;scopes:Scope[]};
 export const issuer: 'https://id.xcenter.it';
 export type Scope = 'openid' | 'profile' | 'email' | 'age_range' | 'app_data' | 'friends' | 'offline_access' |
-  'files_read' | 'files_write' | 'shared_files_read';
+  'files_read' | 'files_write' | 'shared_files_read' | 'account_overview' | 'account_manage';
 export interface LoginTransaction {state:string;nonce:string;verifier:string;expiresAt:number}
 export interface DeviceTransaction {nonce:string;expiresAt:number;response:{device_code:string;expires_in:number;interval?:number}}
 export interface Tokens {

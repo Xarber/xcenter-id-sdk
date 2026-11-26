@@ -36,7 +36,18 @@ export interface UploadProgress {id:string;received:number;total:number}
 export interface PeerSession {id:string;proof:string;expiresIn:number}
 export type PeerMessageType = 'offer' | 'answer' | 'candidate';
 export interface PeerMessage {type:PeerMessageType;data:{[key:string]:Json}}
+export interface AccountSummary {storage:{used:number;capacity:number};connectedApps:number}
+export type PublicProfileField = 'username' | 'givenName' | 'surname' | 'picture';
+export interface AccountPermission {scope:string;required:boolean;enabled:boolean;canEnable:boolean;address?:string}
 export interface UserClient {
+  account:{
+    visibility(options?:Options):Promise<{fields:PublicProfileField[]}>;
+    updateVisibility(fields:readonly PublicProfileField[],options?:Options):Promise<{fields:PublicProfileField[]}>;
+    apps(options?:Options):Promise<{apps:{client:string;label:string;verified:boolean}[]}>;
+    permissions(client:string,options?:Options):Promise<{permissions:AccountPermission[]}>;
+    disablePermission(client:string,scope:string,options?:Options):Promise<{permissions:AccountPermission[]}>;
+  };
+  accountOverview(options?:Options):Promise<AccountSummary>;
   peers:{
     open(settings:{discoverable:boolean},options?:Options):Promise<PeerSession>;
     list(peer:PeerSession,options?:Options):Promise<{peers:string[]}>;
@@ -79,7 +90,7 @@ export function createTransport(options?:{getAccessToken?:()=>string|Promise<str
   (path:string,options?:Options & {method?:string;body?:Json;revision?:number;binary?:boolean;peerProof?:string})=>Promise<unknown>;
 export function createRecords(request:ReturnType<typeof createTransport>,clientId:string):Records;
 
-export const scopes: readonly ['openid','profile','email','age_range','app_data','friends','offline_access','files_read','files_write','shared_files_read'];
+export const scopes: readonly ['openid','profile','email','age_range','app_data','friends','offline_access','files_read','files_write','shared_files_read','account_overview','account_manage'];
 export type PublicScope = (typeof scopes)[number];
 export interface OAuthTransaction {state:string;nonce:string;verifier:string;expiresAt:number}
 export interface PublicTokens {access_token:string;token_type:string;id_token?:string;refresh_token?:string;expires_in?:number;scope?:string}

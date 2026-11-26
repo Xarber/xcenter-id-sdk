@@ -12,3 +12,5 @@ The packages provide account settings surfaces and secure sign-in integration fo
 - [Verification and platform status](TESTING.md)
 - [Security boundaries](SECURITY.md)
 - [Supported distribution](RELEASES.md)
+
+- [Account APIs, uploads and peer signaling](ACCOUNT_AND_PEER_APIS.md)

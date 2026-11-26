@@ -2,7 +2,7 @@ import {issuer, XCenterError} from './index.js';
 import {publicConfig} from './config.js';
 
 export const scopes = Object.freeze(['openid','profile','email','age_range','app_data','friends','offline_access',
-  'files_read','files_write','shared_files_read']);
+  'files_read','files_write','shared_files_read','account_overview','account_manage']);
 const characters = /^[A-Za-z0-9_-]{22,128}$/;
 const encodeText = value => new TextEncoder().encode(value);
 const encode = bytes => btoa(String.fromCharCode(...bytes)).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');

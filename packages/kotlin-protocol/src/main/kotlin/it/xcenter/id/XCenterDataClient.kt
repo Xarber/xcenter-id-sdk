@@ -46,6 +46,38 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
         return send(recordPath(collection, RecordSpace.Own) + "/" + segment(id), "DELETE", revision = revision)
     }
 
+    fun profileVisibility() = send("/v1/account/profile-visibility")
+    fun updateProfileVisibility(fields: List<String>) =
+        send("/v1/account/profile-visibility","PUT",JSONObject().put("fields",org.json.JSONArray(fields)))
+    fun connectedApps() = send("/v1/account/apps")
+    fun connectedPermissions(client: String) = send("/v1/account/apps/${segment(client,100)}/permissions")
+    fun disableConnectedPermission(client: String, scope: String) =
+        send("/v1/account/apps/${segment(client,100)}/permissions","PUT",JSONObject().put("scope",scope).put("enabled",false))
+
+    fun accountOverview() = send("/v1/account/overview")
+
+    fun startUpload(name: String, size: Long, folder: String? = null) =
+        send("/v1/files/uploads","POST",JSONObject().put("name",name).put("size",size).put("folder",folder ?: JSONObject.NULL))
+
+    fun uploadStatus(id: String) = send("/v1/files/uploads/${segment(id,36)}")
+    fun appendUpload(id: String, position: Long, content: ByteArray) =
+        send("/v1/files/uploads/${segment(id,36)}","PUT",
+            JSONObject().put("position",position).put("content",Base64.encode(content)))
+    fun completeUpload(id: String) = send("/v1/files/uploads/${segment(id,36)}","POST",JSONObject())
+    fun cancelUpload(id: String) = send("/v1/files/uploads/${segment(id,36)}","DELETE")
+
+    fun openPeer(discoverable: Boolean = false) =
+        send("/v1/peers","POST",JSONObject().put("discoverable",discoverable))
+    fun listPeers(id: String, proof: String) =
+        send("/v1/peers/${segment(id,24)}/directory",peerProof=proof)
+    fun receivePeerMessages(id: String, proof: String) =
+        send("/v1/peers/${segment(id,24)}/messages",peerProof=proof)
+    fun sendPeerMessage(id: String, proof: String, to: String, type: String, data: JSONObject) =
+        send("/v1/peers/${segment(id,24)}/messages","POST",
+            JSONObject().put("to",to).put("type",type).put("data",data),peerProof=proof)
+    fun closePeer(id: String, proof: String) =
+        send("/v1/peers/${segment(id,24)}","DELETE",peerProof=proof)
+
     fun listFiles(folder: String? = null) = send("/v1/files" + query("folder",folder))
     fun downloadFile(id: String) = send("/v1/files/${segment(id,36)}")
     fun listSharedFiles() = send("/v1/files/shared")
@@ -88,7 +120,7 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
     }
 
     private fun send(path: String, method: String = "GET", payload: JSONObject? = null,
-                     revision: Long? = null, authenticated: Boolean = true): ByteArray {
+                     revision: Long? = null, authenticated: Boolean = true, peerProof: String? = null): ByteArray {
         val headers=mutableMapOf<String,String>()
         if (authenticated) {
             val credential = requireNotNull(accessToken) { "Sign in first." }.invoke()
@@ -98,6 +130,10 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
         if(revision!=null){
             require(revision>=0)
             headers["If-Match"]="\"$revision\""
+        }
+        if(peerProof!=null){
+            require(peerProof.matches(Regex("[A-Za-z0-9_-]{43}"))) { "Supply a valid peer proof." }
+            headers["X-XCenter-Peer-Proof"]=peerProof
         }
         if(payload!=null)headers["Content-Type"]="application/json"
         return transport(DataRequest(ISSUER+path,method,headers,payload?.toString()?.encodeToByteArray()))

@@ -25,7 +25,7 @@ class XCenterOAuth internal constructor(
     companion object {
         const val ISSUER = "https://id.xcenter.it"
         val scopes = setOf("openid","profile","email","age_range","app_data","friends","offline_access",
-            "files_read","files_write","shared_files_read")
+            "files_read","files_write","shared_files_read","account_overview","account_manage")
         private val secureRandom = SecureRandom()
         private val base64 = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT_OPTIONAL)
         private val proof = Regex("[A-Za-z0-9_-]{22,128}")

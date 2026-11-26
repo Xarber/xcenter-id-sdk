@@ -16,7 +16,7 @@ public struct XCenterOAuthTransaction: Codable {
 
 public final class XCenterOAuth {
     public static let supportedScopes: Set<String> = ["openid","profile","email","age_range","app_data","friends",
-        "offline_access","files_read","files_write","shared_files_read"]
+        "offline_access","files_read","files_write","shared_files_read","account_overview","account_manage"]
 
     public let clientID: String
     public let redirectURI: URL

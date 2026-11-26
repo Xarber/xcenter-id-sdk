@@ -125,6 +125,71 @@ public struct XCenterDataClient {
         return try await request(ownPath(collection)+[id], method:"DELETE", revision:revision)
     }
 
+    public func profileVisibility() async throws -> Data { try await request(["v1","account","profile-visibility"]) }
+    public func updateProfileVisibility(_ fields: [String]) async throws -> Data {
+        try await request(["v1","account","profile-visibility"],method:"PUT",body:JSONEncoder().encode(["fields":fields]))
+    }
+    public func connectedApps() async throws -> Data { try await request(["v1","account","apps"]) }
+    public func connectedPermissions(_ client: String) async throws -> Data {
+        try await request(["v1","account","apps",client,"permissions"])
+    }
+    public func disableConnectedPermission(_ client: String, scope: String) async throws -> Data {
+        let body = try JSONSerialization.data(withJSONObject:["scope":scope,"enabled":false])
+        return try await request(["v1","account","apps",client,"permissions"],method:"PUT",body:body)
+    }
+
+    public func accountOverview() async throws -> Data { try await request(["v1","account","overview"]) }
+
+    public func startUpload(name: String, size: Int64, folder: String? = nil) async throws -> Data {
+        var body: [String: Any] = ["name": name, "size": size]
+        if let folder { body["folder"] = folder }
+        return try await request(["v1","files","uploads"],method:"POST",body:JSONSerialization.data(withJSONObject:body))
+    }
+
+    public func uploadStatus(_ id: String) async throws -> Data {
+        try await request(["v1","files","uploads",id])
+    }
+
+    public func appendUpload(_ id: String, position: Int64, content: Data) async throws -> Data {
+        try await request(["v1","files","uploads",id],method:"PUT",
+            body: JSONSerialization.data(withJSONObject:["position":position,"content":content.base64EncodedString()]))
+    }
+
+    public func completeUpload(_ id: String) async throws -> Data {
+        try await request(["v1","files","uploads",id],method:"POST",body:Data("{}".utf8))
+    }
+
+    public func cancelUpload(_ id: String) async throws -> Data {
+        try await request(["v1","files","uploads",id],method:"DELETE")
+    }
+
+    public func openPeer(discoverable: Bool = false) async throws -> Data {
+        try await request(["v1","peers"],method:"POST",body:JSONEncoder().encode(["discoverable":discoverable]))
+    }
+
+    public func listPeers(_ id: String, proof: String) async throws -> Data {
+        try await request(["v1","peers",id,"directory"],peerProof:proof)
+    }
+
+    public func receivePeerMessages(_ id: String, proof: String) async throws -> Data {
+        try await request(["v1","peers",id,"messages"],peerProof:proof)
+    }
+
+    public func sendPeerMessage<Value: Encodable>(_ id: String, proof: String, to: String, type: String, data: Value) async throws -> Data {
+        let body=try JSONEncoder().encode(PeerSignal(to:to,type:type,data:data))
+        return try await request(["v1","peers",id,"messages"],method:"POST",body:body,peerProof:proof)
+    }
+
+    public func closePeer(_ id: String, proof: String) async throws -> Data {
+        try await request(["v1","peers",id],method:"DELETE",peerProof:proof)
+    }
+
+    private struct PeerSignal<Value: Encodable>: Encodable {
+        let to: String
+        let type: String
+        let data: Value
+    }
+
     public func listFiles(folder: String? = nil) async throws -> Data {
         try await request(["v1","files"], query:folder.map { URLQueryItem(name:"folder",value:$0) })
     }
@@ -171,7 +236,7 @@ public struct XCenterDataClient {
     }
 
     private func request(_ parts: [String], method: String = "GET", body: Data? = nil, revision: Int? = nil,
-                         authenticated: Bool = true, query: URLQueryItem? = nil, queryItems: [URLQueryItem] = []) async throws -> Data {
+                         authenticated: Bool = true, query: URLQueryItem? = nil, queryItems: [URLQueryItem] = [], peerProof: String? = nil) async throws -> Data {
         guard parts.allSatisfy({ $0 != "." && $0 != ".." && $0.range(of:"^[A-Za-z0-9._-]{1,120}$",options:.regularExpression) != nil }),
               revision.map({$0 >= 0}) ?? true else { throw URLError(.badURL) }
         var url = URLComponents(url:Self.issuer,resolvingAgainstBaseURL:false)!
@@ -186,6 +251,12 @@ public struct XCenterDataClient {
                 throw URLError(.userAuthenticationRequired)
             }
             request.setValue("Bearer "+accessToken,forHTTPHeaderField:"Authorization")
+        }
+        if let peerProof {
+            guard peerProof.range(of:"^[A-Za-z0-9_-]{43}$",options:.regularExpression) != nil else {
+                throw URLError(.userAuthenticationRequired)
+            }
+            request.setValue(peerProof,forHTTPHeaderField:"X-XCenter-Peer-Proof")
         }
         if let revision { request.setValue("\"\(revision)\"",forHTTPHeaderField:"If-Match") }
         if let body {

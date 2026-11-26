@@ -1,3 +1,4 @@
+import type { AccountSummary, PublicProfileField, UserClient } from '@xcenter-id/client';
 import { useRef, useState, type ReactNode } from 'react';
 import { Image, Linking, Platform, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View, useColorScheme, type ImageSourcePropType } from 'react-native';
 import {dismissAuthSession,openAuthSessionAsync} from 'expo-web-browser';
@@ -34,6 +35,8 @@ export type AccountOverviewProps = {
   onSignOut?: () => void | Promise<void>;
   syncOptions?: readonly OverviewSyncOption[];
   settings?: ReactNode;
+  accountSummary?: AccountSummary;
+  accountClient?: Pick<UserClient,"account">;
   onOpenSettings?: () => void;
   onManageAccount?: () => void | Promise<void>;
 };
@@ -44,7 +47,14 @@ const palettes = {
 };
 
 /** Account entry and details. The host validates and stores its own session. */
-export function AccountOverview({profile,clientId,signIn,iosBackendSignIn,webSignIn,onSignIn,onSignOut,syncOptions=[],settings,onOpenSettings,onManageAccount}:AccountOverviewProps) {
+function storageAmount(bytes:number){
+  const units=['B','KB','MB','GB','TB'];
+  let value=Math.max(0,bytes),index=0;
+  while(value>=1024&&index<units.length-1){value/=1024;index++;}
+  return (Math.round(value*10)/10)+' '+units[index];
+}
+
+export function AccountOverview({profile,clientId,signIn,iosBackendSignIn,webSignIn,onSignIn,onSignOut,syncOptions=[],settings,accountSummary,accountClient,onOpenSettings,onManageAccount}:AccountOverviewProps) {
   const palette=useColorScheme()==='dark'?palettes.dark:palettes.light;
   const [pictureFailed,setPictureFailed]=useState<ImageSourcePropType>();
   const [error,setError]=useState('');
@@ -144,6 +154,14 @@ export function AccountOverview({profile,clientId,signIn,iosBackendSignIn,webSig
           </View>
           {!!error&&<Text accessibilityRole="alert" style={{color:palette.ink}}>{error}</Text>}
         </View>
+    {profile&&accountSummary&&<View style={[styles.option,{backgroundColor:palette.panel,borderColor:palette.line}]}>
+      <View style={styles.identityText}>
+        <Text accessibilityRole="header" style={[styles.actionLabel,{color:palette.ink}]}>Account activity</Text>
+        <Text style={{color:palette.muted}}>Storage {storageAmount(accountSummary.storage.used)} of {storageAmount(accountSummary.storage.capacity)}</Text>
+        <Text style={{color:palette.muted}}>Connected apps {accountSummary.connectedApps}</Text>
+      </View>
+    </View>}
+    {details&&profile&&accountClient&&<AccountVisibility key={profile.username} client={accountClient} palette={palette}/>}
     {(syncOptions.length>0||settings||onOpenSettings)&&<View style={styles.settings}>
       <Text accessibilityRole="header" style={[styles.heading,{color:palette.ink}]}>App settings</Text>
       {syncOptions.map(option=><View key={option.id} style={[styles.option,{backgroundColor:palette.panel,borderColor:palette.line}]}>
@@ -159,6 +177,37 @@ export function AccountOverview({profile,clientId,signIn,iosBackendSignIn,webSig
     </View>}
       </ScrollView>
     </Modal>
+  </View>;
+}
+
+const visibilityOptions:readonly [PublicProfileField,string][]=[
+  ['username','Username'],['givenName','First name'],['surname','Last name'],['picture','Profile photo'],
+];
+
+function AccountVisibility({client,palette}:{client:Pick<UserClient,"account">;palette:typeof palettes.light}){
+  const [fields,setFields]=useState<PublicProfileField[]>();
+  const [working,setWorking]=useState(false);
+  const [feedback,setFeedback]=useState('');
+  async function work(save=false){
+    setWorking(true);setFeedback('');
+    try{
+      const result=save&&fields?await client.account.updateVisibility(fields):await client.account.visibility();
+      setFields(result.fields);
+      if(save)setFeedback('Public profile updated.');
+    }catch{setFeedback('Public profile settings are unavailable. Check the app’s account permissions.');}
+    finally{setWorking(false);}
+  }
+  return <View style={styles.settings}>
+    <Text accessibilityRole="header" style={[styles.heading,{color:palette.ink}]}>Public profile</Text>
+    {fields&&visibilityOptions.map(([field,label])=><View style={styles.option} key={field}>
+      <Text style={{flex:1,color:palette.ink}}>{label}</Text><Switch accessibilityLabel={label} value={fields.includes(field)} disabled={working}
+        onValueChange={enabled=>setFields(current=>enabled?[...(current??[]),field]:(current??[]).filter(value=>value!==field))}/>
+    </View>)}
+    <Pressable accessibilityRole="button" disabled={working} onPress={()=>void work(!!fields)}
+      style={[styles.action,{borderColor:palette.line}]}>
+      <Text style={[styles.actionLabel,{color:palette.accent}]}>{fields?'Save public profile':'Edit public profile'}</Text>
+    </Pressable>
+    {!!feedback&&<Text accessibilityLiveRegion="polite" style={{color:palette.ink}}>{feedback}</Text>}
   </View>;
 }
 

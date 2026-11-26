@@ -50,6 +50,41 @@ class XCenterDataClient {
     return _send('${_records('v1', _own, collection)}/${_segment(id)}', method: 'DELETE', revision: revision);
   }
 
+  Future<Uint8List> profileVisibility() => _send('/v1/account/profile-visibility');
+  Future<Uint8List> updateProfileVisibility(List<String> fields) =>
+      _send('/v1/account/profile-visibility',method:'PUT',body:{'fields':fields});
+  Future<Uint8List> connectedApps() => _send('/v1/account/apps');
+  Future<Uint8List> connectedPermissions(String client) =>
+      _send('/v1/account/apps/${_segment(client,100)}/permissions');
+  Future<Uint8List> disableConnectedPermission(String client,String scope) =>
+      _send('/v1/account/apps/${_segment(client,100)}/permissions',method:'PUT',body:{'scope':scope,'enabled':false});
+
+  Future<Uint8List> accountOverview() => _send('/v1/account/overview');
+
+  Future<Uint8List> startUpload(String name, int size, {String? folder}) =>
+      _send('/v1/files/uploads', method:'POST', body:{'name':name,'size':size,'folder':folder});
+  Future<Uint8List> uploadStatus(String id) => _send('/v1/files/uploads/${_segment(id,36)}');
+  Future<Uint8List> appendUpload(String id, int position, Uint8List content) =>
+      _send('/v1/files/uploads/${_segment(id,36)}', method:'PUT',
+        body:{'position':position,'content':base64Encode(content)});
+  Future<Uint8List> completeUpload(String id) =>
+      _send('/v1/files/uploads/${_segment(id,36)}', method:'POST', body:{});
+  Future<Uint8List> cancelUpload(String id) =>
+      _send('/v1/files/uploads/${_segment(id,36)}', method:'DELETE');
+
+  Future<Uint8List> openPeer({bool discoverable=false}) =>
+      _send('/v1/peers', method:'POST',body:{'discoverable':discoverable});
+  Future<Uint8List> listPeers(String id,String proof) =>
+      _send('/v1/peers/${_segment(id,24)}/directory',peerProof:proof);
+  Future<Uint8List> receivePeerMessages(String id,String proof) =>
+      _send('/v1/peers/${_segment(id,24)}/messages',peerProof:proof);
+  Future<Uint8List> sendPeerMessage(String id,String proof,{required String to,required String type,
+      required Map<String,Object?> data}) =>
+      _send('/v1/peers/${_segment(id,24)}/messages',method:'POST',peerProof:proof,
+        body:{'to':to,'type':type,'data':data});
+  Future<Uint8List> closePeer(String id,String proof) =>
+      _send('/v1/peers/${_segment(id,24)}',method:'DELETE',peerProof:proof);
+
   Future<Uint8List> listFiles({String? folder}) => _send('/v1/files', query: {if (folder != null) 'folder': folder});
   Future<Uint8List> downloadFile(String id) => _send('/v1/files/${_segment(id, 36)}');
   Future<Uint8List> listSharedFiles() => _send('/v1/files/shared');
@@ -86,7 +121,7 @@ class XCenterDataClient {
       '/$prefix/apps/${_segment(client, 100)}/data/${_segment(collection, 80)}';
 
   Future<Uint8List> _send(String path, {String method = 'GET', Map<String,String>? query,
-      Object? body, int? revision, bool authenticated = true}) async {
+      Object? body, int? revision, bool authenticated = true, String? peerProof}) async {
     if (revision != null && revision < 0) throw ArgumentError('Invalid record revision.');
     String? token;
     if (authenticated) {
@@ -97,6 +132,10 @@ class XCenterDataClient {
     }
     final request = http.Request(method, Uri.https('id.xcenter.it', path, query))..followRedirects = false;
     if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    if (peerProof != null) {
+      if (!RegExp(r'^[A-Za-z0-9_-]{43}$').hasMatch(peerProof)) throw ArgumentError('Supply a valid peer proof.');
+      request.headers['X-XCenter-Peer-Proof'] = peerProof;
+    }
     if (revision != null) request.headers['If-Match'] = '"$revision"';
     if (body != null) {
       request.headers['Content-Type'] = 'application/json';
