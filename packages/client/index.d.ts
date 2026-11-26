@@ -31,7 +31,19 @@ export interface PublicClient {
   listRecords<T extends Json = Json>(client:string,collection:string,options?:PageOptions):Promise<RecordPage<T>>;
   getRecord<T extends Json = Json>(client:string,collection:string,id:string,options?:Options):Promise<StoredRecord<T>>;
 }
+export interface ChunkedFile {name:string;size:number;folder?:string|null}
+export interface UploadProgress {id:string;received:number;total:number}
+export interface PeerSession {id:string;proof:string;expiresIn:number}
+export type PeerMessageType = 'offer' | 'answer' | 'candidate';
+export interface PeerMessage {type:PeerMessageType;data:{[key:string]:Json}}
 export interface UserClient {
+  peers:{
+    open(settings:{discoverable:boolean},options?:Options):Promise<PeerSession>;
+    list(peer:PeerSession,options?:Options):Promise<{peers:string[]}>;
+    receive(peer:PeerSession,options?:Options):Promise<{messages:(PeerMessage & {from:string})[]}>;
+    send(peer:PeerSession,message:PeerMessage & {to:string},options?:Options):Promise<{accepted:true}>;
+    close(peer:PeerSession,options?:Options):Promise<{ok:true}>;
+  };
   userInfo(options?:Options):Promise<UserInfo>;
   avatar(options?:Options):Promise<Response>;
   friends(options?:Options):Promise<{friends:{username:string;sub?:string}[]}>;
@@ -41,6 +53,14 @@ export interface UserClient {
     get<T extends Json = Json>(client:string,collection:string,id:string,options?:Options):Promise<StoredRecord<T>>;
   };
   files:{
+    transfers:{
+      start(file:ChunkedFile,options?:Options):Promise<{id:string;chunkSize:number}>;
+      status(id:string,options?:Options):Promise<{id:string;chunkSize:number;size:number;received:number;committed:boolean}>;
+      append(id:string,chunk:{position:number;content:string},options?:Options):Promise<{received:number}>;
+      complete(id:string,options?:Options):Promise<{id:string}>;
+      cancel(id:string,options?:Options):Promise<{ok:true}>;
+    };
+    uploadChunks(file:ChunkedFile,readChunk:(offset:number,length:number)=>string|Promise<string>,options?:Options & {id?:string;onProgress?:(progress:UploadProgress)=>void}):Promise<{id:string}>;
     list(options?:Options & {folder?:string|null}):Promise<{files:FileEntry[];folders:Folder[];breadcrumbs:Folder[]}>;
     download(id:string,options?:Options):Promise<Response>;
     upload(file:{name:string;content:string;folder?:string|null},options?:Options):Promise<{id:string}>;
@@ -56,7 +76,7 @@ export interface UserClient {
 export function createPublicClient(options?:{fetch?:typeof fetch}):PublicClient;
 export function createUserClient(options:{clientId:string;getAccessToken:()=>string|Promise<string>;fetch?:typeof fetch}):UserClient;
 export function createTransport(options?:{getAccessToken?:()=>string|Promise<string>;fetch?:typeof fetch}):
-  (path:string,options?:Options & {method?:string;body?:Json;revision?:number;binary?:boolean})=>Promise<unknown>;
+  (path:string,options?:Options & {method?:string;body?:Json;revision?:number;binary?:boolean;peerProof?:string})=>Promise<unknown>;
 export function createRecords(request:ReturnType<typeof createTransport>,clientId:string):Records;
 
 export const scopes: readonly ['openid','profile','email','age_range','app_data','friends','offline_access','files_read','files_write','shared_files_read'];

@@ -30,7 +30,7 @@ const dataPath = (prefix, client, collection, id) =>
 const filePath = (prefix, id) => prefix + '/' + segment(id, 36);
 
 export function createTransport({fetch: send = globalThis.fetch, getAccessToken} = {}) {
-  return async (path, {method = 'GET', body, revision, binary = false, signal} = {}) => {
+  return async (path, {method = 'GET', body, revision, binary = false, signal, peerProof} = {}) => {
     const url = new URL(path, issuer);
     if (url.origin !== issuer || !path.startsWith('/') || path.startsWith('//')) {
       throw new TypeError('Unexpected X-Center ID endpoint.');
@@ -42,6 +42,10 @@ export function createTransport({fetch: send = globalThis.fetch, getAccessToken}
         throw new TypeError('A valid X-Center ID credential is required.');
       }
       headers.Authorization = 'Bearer ' + token;
+    }
+    if(peerProof!==undefined){
+      if(!path.startsWith('/v1/peers/')||!/^[A-Za-z0-9_-]{43}$/.test(peerProof))throw new TypeError('Invalid peer proof.');
+      headers['X-XCenter-Peer-Proof']=peerProof;
     }
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (revision !== undefined) {
@@ -101,7 +105,24 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
     return token;
   }});
   const files = '/v1/files', folders = files + '/folders', shared = files + '/shared';
+  const uploads=files+'/uploads';
+  const transfer = {
+    start: (file,{signal}={})=>request(uploads,{method:'POST',body:file,signal}),
+    status: (id,{signal}={})=>request(filePath(uploads,id),{signal}),
+    append: (id,chunk,{signal}={})=>request(filePath(uploads,id),{method:'PUT',body:chunk,signal}),
+    complete: (id,{signal}={})=>request(filePath(uploads,id),{method:'POST',body:{},signal}),
+    cancel: (id,{signal}={})=>request(filePath(uploads,id),{method:'DELETE',signal}),
+  };
+  const routeFor=(peer,action='')=>'/v1/peers/'+segment(peer.id,24)+(action?'/'+action:'');
+  const peers={
+    open: (settings,{signal}={})=>request('/v1/peers',{method:'POST',body:settings,signal}),
+    list: (peer,{signal}={})=>request(routeFor(peer,'directory'),{peerProof:peer.proof,signal}),
+    receive: (peer,{signal}={})=>request(routeFor(peer,'messages'),{peerProof:peer.proof,signal}),
+    send: (peer,message,{signal}={})=>request(routeFor(peer,'messages'),{method:'POST',peerProof:peer.proof,body:message,signal}),
+    close: (peer,{signal}={})=>request(routeFor(peer),{method:'DELETE',peerProof:peer.proof,signal}),
+  };
   return {
+    peers,
     userInfo: ({signal} = {}) => request('/me', {signal}),
     avatar: ({signal} = {}) => request('/v1/profile/avatar', {signal, binary:true}),
     friends: ({signal} = {}) => request('/v1/profile/friends', {signal}),
@@ -111,6 +132,23 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
       get: (source, collection, id, {signal} = {}) => request(dataPath('/v1', source, collection, id), {signal}),
     },
     files: {
+      transfers:transfer,
+      async uploadChunks(file,readChunk,{id,signal,onProgress}={}){
+        const info=id?await transfer.status(id,{signal}):await transfer.start(file,{signal});
+        if(info.size!==undefined&&info.size!==file.size)throw new TypeError('The resumed file size must match.');
+        const uploadId=info.id;
+        let received=info.received??0;
+        onProgress?.({id:uploadId,received,total:file.size});
+        while(received<file.size){
+          const length=Math.min(info.chunkSize,file.size-received);
+          const content=await readChunk(received,length);
+          const next=await transfer.append(uploadId,{position:received,content},{signal});
+          if(next.received!==received+length)throw new Error('Unexpected upload position.');
+          received=next.received;
+          onProgress?.({id:uploadId,received,total:file.size});
+        }
+        return info.committed?{id:uploadId}:transfer.complete(uploadId,{signal});
+      },
       list: ({folder, signal} = {}) => request(files + query('folder', folder), {signal}),
       download: (id, {signal} = {}) => request(filePath(files, id), {signal, binary:true}),
       upload: (body, {signal} = {}) => {
