@@ -22,7 +22,7 @@ QR and manual codes are for devices such as TVs or kiosks where the regular flow
 
 ### Session renewal
 
-Request `offline_access` and `prompt=consent` for a renewable X-Center session. Access tokens last ten minutes. Refresh has a rolling 14-day idle window and rotates on each exchange. Refresh near expiry when there is foreground activity. Serialize refresh and replace the stored token atomically. Reusing a consumed token can revoke the grant. Stop refreshing after unlinking, revocation, sign-out or prolonged inactivity. Use a separate product session. Use SecureStore, Keychain or encrypted platform storage for native product credentials, and Secure HttpOnly cookies on the web.
+Request `offline_access` by default for regular account sign-in. Let the hosted **Stay signed in** toggle collect the choice and skip a separate prompt in the app. Use `prompt=consent` when asking the user to grant or revisit that choice. If there is no refresh token, complete a short session. Access tokens last ten minutes. Refresh has a rolling 14-day idle window and rotates on each exchange. Refresh near expiry when there is foreground activity. Serialize refresh and replace the stored token atomically. Reusing a consumed token can revoke the grant. Stop refreshing after unlinking, revocation, sign-out or prolonged inactivity. Use a separate product session. Use SecureStore, Keychain or encrypted platform storage for native product credentials, and Secure HttpOnly cookies on the web.
 
 ### Profile and settings
 

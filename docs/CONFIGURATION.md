@@ -55,6 +55,6 @@ Issuer sign-out opens the provider's session end page. Unlinking from the dashbo
 
 ### Ask to stay signed in
 
-Include `offline_access` alongside `openid` and other required scopes in the authorization request. Use `prompt=consent` when explicitly asking the user to make or revisit this choice. X-Center ID shows **Stay signed in** on its consent page when that permission is offered. A successful sign-in can still omit a refresh token if the user declines. Treat that as a short session and keep the app usable.
+Request `offline_access` by default alongside `openid` and other required scopes for normal account sign-in. Omit it for an intentionally short session or when the app cannot securely handle renewal. Use `prompt=consent` when explicitly asking the user to make or revisit this choice. The hosted X-Center ID consent page lets users turn off **Stay signed in**. Skip any duplicate prompt or checkbox in the app. A successful sign-in can still omit a refresh token if the user declines. Finish sign-in with a short session that ends by the issuer access token’s expiry.
 
 Use the returned refresh token as evidence that session renewal was granted. Retain it on the confidential backend, or in OS-protected storage for a public native app that owns the exchange. Refresh on demand, serialize rotation, and replace the previous token with the returned token. Clear the session and ask the user to sign in again if renewal is rejected. For backend browser handoffs, return only a product session and whether persistence was granted to the native client.
