@@ -96,6 +96,7 @@ test('all public and delegated data operations use their documented wire routes'
   await user.sharedRecords.list('publisher','notes',{cursor:'third'});
   await user.sharedRecords.get('publisher','notes','opaque-id');
   await user.files.list({folder:'root-folder'});
+  await user.files.get('file');
   await user.files.download('file');
   await user.files.upload({name:'file.txt',content:'YQ=='});
   await user.files.update('file',{name:'renamed.txt',folder:null});
@@ -104,6 +105,7 @@ test('all public and delegated data operations use their documented wire routes'
   await user.files.updateFolder('folder',{name:'Renamed folder'});
   await user.files.deleteFolder('folder');
   await user.files.listShared();
+  await user.files.getShared('share');
   await user.files.downloadShared('share');
   await service.records.list('notes');
   await service.records.get('notes','entry');
@@ -127,6 +129,7 @@ test('all public and delegated data operations use their documented wire routes'
     ['GET','/v1/apps/publisher/data/notes?cursor=third',userToken],
     ['GET','/v1/apps/publisher/data/notes/opaque-id',userToken],
     ['GET','/v1/files?folder=root-folder',userToken],
+    ['GET','/v1/files/file?metadata=1',userToken],
     ['GET','/v1/files/file',userToken],
     ['POST','/v1/files',userToken],
     ['PATCH','/v1/files/file',userToken],
@@ -135,6 +138,7 @@ test('all public and delegated data operations use their documented wire routes'
     ['PATCH','/v1/files/folders/folder',userToken],
     ['DELETE','/v1/files/folders/folder',userToken],
     ['GET','/v1/files/shared',userToken],
+    ['GET','/v1/files/shared/share?metadata=1',userToken],
     ['GET','/v1/files/shared/share',userToken],
     ['GET','/v1/apps/example/data/notes',key],
     ['GET','/v1/apps/example/data/notes/entry',key],
@@ -206,7 +210,7 @@ test('app files use private container routes and distinguish user and service cr
   const calls=[];
   const id='abcdef11-1234-1234-9123-1234567890ab';
   const fixture=async (url,options)=>{
-    calls.push([new URL(url).pathname,options]);
+    calls.push([new URL(url).pathname+new URL(url).search,options]);
     if(options.method==='PUT'&&url.includes('/uploads/'))return Response.json({received:3});
     if(options.method==='POST'&&url.endsWith('/uploads'))return Response.json({id,chunkSize:524288});
     if(options.method==='GET'&&url.endsWith(id))return new Response('abc');
@@ -225,12 +229,16 @@ test('app files use private container routes and distinguish user and service cr
   assert.deepEqual(JSON.parse(calls[4][1].body),{browseable:false});
   await user.appFiles.setVisibility(id,{browseable:true,editable:true});
   assert.deepEqual(JSON.parse(calls[5][1].body),{browseable:true,editable:true});
+  assert.equal((await user.appFiles.get(id)).id,id);
+  assert.equal(calls.at(-1)[0],'/v1/apps/backup/files/'+id+'?metadata=1');
   assert.ok(calls.every(([,request])=>request.headers.Authorization==='Bearer user-fixture'));
   calls.length=0;
   assert.equal((await service.files.uploadChunks({name:'server.zip',size:3},read)).id,id);
   assert.equal(service.files.setBrowseable,undefined);
   assert.equal(await (await service.files.download(id)).text(),'abc');
   await service.files.delete(id);
+  assert.equal((await service.files.get(id)).id,id);
+  assert.equal(calls.at(-1)[0],'/v1/apps/backup/files/'+id+'?metadata=1');
   assert.ok(calls.every(([path,request])=>path.startsWith('/v1/apps/backup/files')&&request.headers.Authorization==='Bearer '+key));
 });
 

@@ -19,7 +19,7 @@ export interface Records {
 }
 export type Profile = {username:string;givenName?:string;surname?:string;avatar?:string|null;verified?:boolean;admin?:boolean};
 export type UserInfo = {sub:string;name?:string;given_name?:string;family_name?:string;preferred_username?:string;picture?:string;email?:string;email_verified?:boolean;age_range?:'child'|'teen'|'adult'};
-export type FileEntry = {id:string;name:string;size:number;created:number};
+export type FileEntry = {id:string;name:string;size:number;created:number;sha256:string};
 export type Folder = {id:string;name:string};
 export interface PublicClient {
   discover(options?:Options):Promise<Record<string,unknown>>;
@@ -47,6 +47,7 @@ export interface ContainerFiles<File> {
   transfers:FileTransfers<File>;
   uploadChunks(file:File,readChunk:(offset:number,length:number)=>string|Promise<string>,options?:Options & {id?:string;onProgress?:(progress:UploadProgress)=>void}):Promise<{id:string}>;
   list(options?:PageOptions):Promise<{files:AppFileEntry[];nextCursor:string|null}>;
+  get(id:string,options?:Options):Promise<AppFileEntry>;
   download(id:string,options?:Options):Promise<Response>;
   delete(id:string,options?:Options):Promise<{ok:true}>;
 }
@@ -93,6 +94,7 @@ export interface UserClient {
     transfers:FileTransfers<ChunkedFile>;
     uploadChunks(file:ChunkedFile,readChunk:(offset:number,length:number)=>string|Promise<string>,options?:Options & {id?:string;onProgress?:(progress:UploadProgress)=>void}):Promise<{id:string}>;
     list(options?:Options & {folder?:string|null}):Promise<{files:FileEntry[];folders:(Folder & {size:number})[];breadcrumbs:Folder[]}>;
+    get(id:string,options?:Options):Promise<FileEntry>;
     download(id:string,options?:Options):Promise<Response>;
     upload(file:{name:string;content:string;folder?:string|null},options?:Options):Promise<{id:string}>;
     update(id:string,change:{name?:string;folder?:string|null},options?:Options):Promise<{ok:true}>;
@@ -101,6 +103,7 @@ export interface UserClient {
     updateFolder(id:string,change:{name?:string;folder?:string|null},options?:Options):Promise<{ok:true}>;
     deleteFolder(id:string,options?:Options):Promise<{ok:true}>;
     listShared(options?:Options):Promise<{incoming:(FileEntry & {from:string})[]}>;
+    getShared(id:string,options?:Options):Promise<FileEntry & {from:string}>;
     downloadShared(id:string,options?:Options):Promise<Response>;
   };
 }

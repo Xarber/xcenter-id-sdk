@@ -23,6 +23,7 @@ class XCenterServiceRecords {
   String get _appFiles => '/v1/apps/$clientId/files';
   Future<Uint8List> listAppFiles({String? cursor}) =>
       _request('GET',_appFiles,query:cursor==null?null:{'cursor':cursor});
+  Future<Uint8List> getAppFile(String id) => _request('GET','$_appFiles/${_part(id,36)}',query:{'metadata':'1'});
   Future<Uint8List> downloadAppFile(String id) => _request('GET','$_appFiles/${_part(id,36)}');
   Future<Uint8List> deleteAppFile(String id) => _request('DELETE','$_appFiles/${_part(id,36)}');
   Future<Uint8List> startAppUpload(String name,int size) =>

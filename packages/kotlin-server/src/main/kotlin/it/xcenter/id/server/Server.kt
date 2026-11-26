@@ -62,6 +62,7 @@ class XCenterServiceRecords(private val clientId:String,private val databaseKey:
     private val appFiles get() = "/v1/apps/$clientId/files"
     fun listAppFiles(cursor:String?=null) =
         fileJson("GET",appFiles+(cursor?.let{"?cursor="+URLEncoder.encode(it,"UTF-8")}.orEmpty()))
+    fun getAppFile(id:String) = fileJson("GET","$appFiles/${validate(id,36)}?metadata=1")
     fun downloadAppFile(id:String) = sendBytes("GET","$appFiles/${validate(id,36)}")
     fun deleteAppFile(id:String) = fileJson("DELETE","$appFiles/${validate(id,36)}")
     fun startAppUpload(name:String,size:Long) =

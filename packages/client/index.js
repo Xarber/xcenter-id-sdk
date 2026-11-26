@@ -131,6 +131,7 @@ export function createAppFiles(request,clientId,service=false) {
     transfers,
     uploadChunks:(file,readChunk,options)=>uploadChunks(transfers,file,readChunk,options),
     list:({cursor,signal}={})=>request(files+query('cursor',cursor),{signal}),
+    get:(id,{signal}={})=>request(filePath(files,id)+'?metadata=1',{signal}),
     download:(id,{signal}={})=>request(filePath(files,id),{signal,binary:true}),
     delete:(id,{signal}={})=>request(filePath(files,id),{method:'DELETE',signal}),
   };
@@ -184,6 +185,7 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
       transfers:transfer,
       uploadChunks: (file,readChunk,options)=>uploadChunks(transfer,file,readChunk,options),
       list: ({folder, signal} = {}) => request(files + query('folder', folder), {signal}),
+      get: (id, {signal} = {}) => request(filePath(files, id)+'?metadata=1', {signal}),
       download: (id, {signal} = {}) => request(filePath(files, id), {signal, binary:true}),
       upload: (body, {signal} = {}) => {
         const content = body?.content;
@@ -198,6 +200,7 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
       updateFolder: (id, body, {signal} = {}) => request(filePath(folders, id), {method:'PATCH', body, signal}),
       deleteFolder: (id, {signal} = {}) => request(filePath(folders, id), {method:'DELETE', signal}),
       listShared: ({signal} = {}) => request(shared, {signal}),
+      getShared: (id, {signal} = {}) => request(filePath(shared, id)+'?metadata=1', {signal}),
       downloadShared: (id, {signal} = {}) => request(filePath(shared, id), {signal, binary:true}),
     },
   };

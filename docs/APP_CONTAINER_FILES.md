@@ -49,3 +49,16 @@ Use `XCenterDataClient` for user files and `XCenterServiceRecords` from the serv
 Swift returns `Data`. The Kotlin user adapter returns `ByteArray`; its server adapter decodes JSON operations to `JSONObject` and returns `ByteArray` for downloads. Dart returns `Uint8List`. For large downloads with native runtimes use a streaming HTTP transport against the [binary API](https://id.xcenter.it/docs/sdk/download-app-file). Ordinary account folder listing results also include a recursive `size` on each folder row.
 
 `setBrowseable(id, false)` clears both flags. Use `setVisibility(id, {browseable: true, editable: false})` to keep a file readable while revoking writes and deletion. The service namespace remains private. The flags grant the account holder access through their dashboard. Apps should treat an editable file as user-controlled and handle changed bytes, a renamed file, or a missing ID.
+
+## File hashes and metadata
+
+Every committed file returned by a list includes `sha256`, a 64-character lowercase hexadecimal SHA-256 of its original bytes. Renames, moves and visibility changes preserve the value. Replacing bytes updates it even when the file ID stays the same. Two independent files containing identical bytes have the same digest. Keep the file ID alongside the hash in an index your app owns.
+
+| File location | JavaScript metadata call | Swift, Kotlin and Dart |
+| --- | --- | --- |
+| User’s Files | `user.files.get(id)` | `getFile(id)` |
+| Incoming file share | `user.files.getShared(shareId)` | `getSharedFile(shareId)` |
+| App’s user container | `user.appFiles.get(id)` | `getAppFile(id)` on the user client |
+| App’s verified service storage | `service.files.get(id)` | `getAppFile(id)` on the service records client |
+
+JavaScript returns a descriptor object. Swift and Dart return JSON bytes from these methods. Kotlin’s user client returns JSON bytes and its JVM service client returns a JSON object. With direct HTTPS, add `?metadata=1` to the file’s download URL and use the same credential. The response contains `id`, `name`, `size`, `created`, and `sha256`, plus applicable share or visibility fields. The download URL without this parameter still returns binary content.

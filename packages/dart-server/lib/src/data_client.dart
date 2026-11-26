@@ -64,6 +64,7 @@ class XCenterDataClient {
   String get _appFiles => '/v1/apps/${_segment(_own,100)}/files';
   Future<Uint8List> listAppFiles({String? cursor}) =>
       _send(_appFiles,query:cursor==null?null:{'cursor':cursor});
+  Future<Uint8List> getAppFile(String id) => _send('$_appFiles/${_segment(id,36)}', query: {'metadata':'1'});
   Future<Uint8List> downloadAppFile(String id) => _send('$_appFiles/${_segment(id,36)}');
   Future<Uint8List> deleteAppFile(String id) => _send('$_appFiles/${_segment(id,36)}',method:'DELETE');
   Future<Uint8List> setAppFileBrowseable(String id,bool browseable) =>
@@ -103,8 +104,10 @@ class XCenterDataClient {
       _send('/v1/peers/${_segment(id,24)}',method:'DELETE',peerProof:proof);
 
   Future<Uint8List> listFiles({String? folder}) => _send('/v1/files', query: {if (folder != null) 'folder': folder});
+  Future<Uint8List> getFile(String id) => _send('/v1/files/${_segment(id, 36)}', query: {'metadata':'1'});
   Future<Uint8List> downloadFile(String id) => _send('/v1/files/${_segment(id, 36)}');
   Future<Uint8List> listSharedFiles() => _send('/v1/files/shared');
+  Future<Uint8List> getSharedFile(String id) => _send('/v1/files/shared/${_segment(id, 36)}', query: {'metadata':'1'});
   Future<Uint8List> downloadSharedFile(String id) => _send('/v1/files/shared/${_segment(id, 36)}');
   Future<Uint8List> createFolder(String name, {String? parent}) =>
       _send('/v1/files/folders', method: 'POST', body: {'name': name, 'folder': parent});

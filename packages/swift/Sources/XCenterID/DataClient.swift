@@ -148,6 +148,9 @@ public struct XCenterDataClient {
     public func listAppFiles(cursor:String? = nil) async throws -> Data {
         try await request(appFilePath(),query:cursor.map { URLQueryItem(name:"cursor",value:$0) })
     }
+    public func getAppFile(_ id: String) async throws -> Data {
+        try await request(appFilePath([id]),query:URLQueryItem(name:"metadata",value:"1"))
+    }
     public func downloadAppFile(_ id:String) async throws -> Data {
         try await request(appFilePath([id]))
     }
@@ -234,8 +237,14 @@ public struct XCenterDataClient {
     public func listFiles(folder: String? = nil) async throws -> Data {
         try await request(["v1","files"], query:folder.map { URLQueryItem(name:"folder",value:$0) })
     }
+    public func getFile(_ id: String) async throws -> Data {
+        try await request(["v1","files",id],query:URLQueryItem(name:"metadata",value:"1"))
+    }
     public func downloadFile(_ id: String) async throws -> Data { try await request(["v1","files",id]) }
     public func listSharedFiles() async throws -> Data { try await request(["v1","files","shared"]) }
+    public func getSharedFile(_ id: String) async throws -> Data {
+        try await request(["v1","files","shared",id],query:URLQueryItem(name:"metadata",value:"1"))
+    }
     public func downloadSharedFile(_ id: String) async throws -> Data { try await request(["v1","files","shared",id]) }
     public func createFolder(name: String, parent: String? = nil) async throws -> Data {
         try await request(["v1","files","folders"], method:"POST",

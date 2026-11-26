@@ -58,6 +58,7 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
 
     private val appFiles get() = "/v1/apps/${segment(requireNotNull(clientId),100)}/files"
     fun listAppFiles(cursor: String? = null) = send(appFiles+query("cursor",cursor))
+    fun getAppFile(id: String) = send("$appFiles/${segment(id,36)}?metadata=1")
     fun downloadAppFile(id: String) = send("$appFiles/${segment(id,36)}")
     fun deleteAppFile(id: String) = send("$appFiles/${segment(id,36)}","DELETE")
     fun setAppFileBrowseable(id: String, browseable: Boolean) =
@@ -95,8 +96,10 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
         send("/v1/peers/${segment(id,24)}","DELETE",peerProof=proof)
 
     fun listFiles(folder: String? = null) = send("/v1/files" + query("folder",folder))
+    fun getFile(id: String) = send("/v1/files/${segment(id,36)}?metadata=1")
     fun downloadFile(id: String) = send("/v1/files/${segment(id,36)}")
     fun listSharedFiles() = send("/v1/files/shared")
+    fun getSharedFile(id: String) = send("/v1/files/shared/${segment(id,36)}?metadata=1")
     fun downloadSharedFile(id: String) = send("/v1/files/shared/${segment(id,36)}")
     fun createFolder(name: String, parent: String? = null) =
         send("/v1/files/folders","POST",JSONObject().put("name",name).put("folder",parent ?: JSONObject.NULL))
