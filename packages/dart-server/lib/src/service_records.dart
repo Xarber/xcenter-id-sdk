@@ -20,14 +20,30 @@ class XCenterServiceRecords {
     if(revision<=0) throw ArgumentError('Supply the current revision.');
     return _send('DELETE',collection,id:id,revision:revision);
   }
+  String get _appFiles => '/v1/apps/$clientId/files';
+  Future<Uint8List> listAppFiles({String? cursor}) =>
+      _request('GET',_appFiles,query:cursor==null?null:{'cursor':cursor});
+  Future<Uint8List> downloadAppFile(String id) => _request('GET','$_appFiles/${_part(id,36)}');
+  Future<Uint8List> deleteAppFile(String id) => _request('DELETE','$_appFiles/${_part(id,36)}');
+  Future<Uint8List> startAppUpload(String name,int size) =>
+      _request('POST','$_appFiles/uploads',body:{'name':name,'size':size});
+  Future<Uint8List> appUploadStatus(String id) => _request('GET','$_appFiles/uploads/${_part(id,36)}');
+  Future<Uint8List> appendAppUpload(String id,int position,Uint8List content) =>
+      _request('PUT','$_appFiles/uploads/${_part(id,36)}',body:{'position':position,'content':base64Encode(content)});
+  Future<Uint8List> completeAppUpload(String id) => _request('POST','$_appFiles/uploads/${_part(id,36)}',body:{});
+  Future<Uint8List> cancelAppUpload(String id) => _request('DELETE','$_appFiles/uploads/${_part(id,36)}');
+
   static String _part(String value,int max) {
     if(value.isEmpty||value.length>max||RegExp(r'[^A-Za-z0-9_-]').hasMatch(value)) throw ArgumentError('Invalid identifier.');
     return value;
   }
   Future<Uint8List> _send(String method,String collection,{String? id,int? revision,
       Map<String,String>? query,Map<String,Object?>? body}) async {
-    if(revision!=null&&revision<0) throw ArgumentError('Invalid revision.');
     final path='/v1/apps/$clientId/data/${_part(collection,80)}'+(id==null?'':'/${_part(id,120)}');
+    return _request(method,path,revision:revision,query:query,body:body);
+  }
+  Future<Uint8List> _request(String method,String path,{int? revision,Map<String,String>? query,Map<String,Object?>? body}) async {
+    if(revision!=null&&revision<0) throw ArgumentError('Invalid revision.');
     final request=http.Request(method,Uri.parse(issuer+path).replace(queryParameters:query))..followRedirects=false;
     request.headers['Authorization']='Bearer $_key';
     if(revision!=null) request.headers['If-Match']='"$revision"';

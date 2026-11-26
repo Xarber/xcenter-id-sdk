@@ -1,5 +1,5 @@
 import {loadXCenterConfig} from './config.js';
-import {createRecords, createTransport} from '@xcenter-id/client';
+import {createAppFiles, createRecords, createTransport} from '@xcenter-id/client';
 export {createPublicClient, createUserClient, XCenterError} from '@xcenter-id/client';
 
 export function createServiceClient(options) {
@@ -11,5 +11,6 @@ export function createServiceClient(options) {
   if (typeof databaseKey !== 'string' || !/^xid-db-[A-Za-z0-9_-]{43}$/.test(databaseKey)) {
     throw new TypeError('Configure the verified app database key.');
   }
-  return {records:createRecords(createTransport({fetch, getAccessToken:()=>databaseKey}), clientId)};
+  const request=createTransport({fetch,getAccessToken:()=>databaseKey});
+  return {records:createRecords(request,clientId),files:createAppFiles(request,clientId,true)};
 }

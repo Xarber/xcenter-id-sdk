@@ -30,7 +30,7 @@ test('public, service, and shared records retain separate permission surfaces', 
   assert.ok(!requests[0].req.headers.Authorization);
   assert.match(requests[0].url,/\/public\/apps\/fixture\/data\/posts\?cursor=page-2$/);
   assert.match(requests[1].req.headers.Authorization,/^Bearer xid-db-/);
-  assert.deepEqual(Object.keys(service),['records']);
+  assert.deepEqual(Object.keys(service),['records','files']);
   const user=createUserClient({clientId:'fixture',getAccessToken:()=> 'fixture-user',fetch});
   await user.sharedRecords.list('publisher','posts');
   assert.match(requests[2].url,/\/v1\/apps\/publisher\/data\/posts$/);
@@ -200,4 +200,34 @@ test('chunk helper resumes at the saved offset and finishes without rereading co
   assert.deepEqual(sent.map(chunk=>chunk.position),[4,8]);
   assert.deepEqual(progress,[4,8,9]);
   assert.deepEqual(await user.files.uploadChunks(file,()=>assert.fail('Committed file read'),{id}),{id});
+});
+
+test('app files use private container routes and distinguish user and service credentials', async () => {
+  const calls=[];
+  const id='abcdef11-1234-1234-9123-1234567890ab';
+  const fixture=async (url,options)=>{
+    calls.push([new URL(url).pathname,options]);
+    if(options.method==='PUT'&&url.includes('/uploads/'))return Response.json({received:3});
+    if(options.method==='POST'&&url.endsWith('/uploads'))return Response.json({id,chunkSize:524288});
+    if(options.method==='GET'&&url.endsWith(id))return new Response('abc');
+    return Response.json({id,ok:true,files:[],nextCursor:null});
+  };
+  const user=createUserClient({clientId:'backup',getAccessToken:()=> 'user-fixture',fetch:fixture});
+  const key='xid-db-'+'k'.repeat(43);
+  const service=createServiceClient({clientId:'backup',databaseKey:key,fetch:fixture});
+  const read=(offset,length)=>{assert.equal(offset,0);assert.equal(length,3);return 'YWJj';};
+  const userFile={name:'backup.zip',size:3,browseable:true};
+  assert.equal((await user.appFiles.uploadChunks(userFile,read)).id,id);
+  assert.deepEqual(JSON.parse(calls[0][1].body),userFile);
+  assert.deepEqual(JSON.parse(calls[1][1].body),{position:0,content:'YWJj'});
+  assert.equal(await (await user.appFiles.download(id)).text(),'abc');
+  await user.appFiles.setBrowseable(id,false);
+  assert.deepEqual(JSON.parse(calls[4][1].body),{browseable:false});
+  assert.ok(calls.every(([,request])=>request.headers.Authorization==='Bearer user-fixture'));
+  calls.length=0;
+  assert.equal((await service.files.uploadChunks({name:'server.zip',size:3},read)).id,id);
+  assert.equal(service.files.setBrowseable,undefined);
+  assert.equal(await (await service.files.download(id)).text(),'abc');
+  await service.files.delete(id);
+  assert.ok(calls.every(([path,request])=>path.startsWith('/v1/apps/backup/files')&&request.headers.Authorization==='Bearer '+key));
 });

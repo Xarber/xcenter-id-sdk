@@ -59,12 +59,31 @@ class XCenterServiceRecords(private val clientId:String,private val databaseKey:
         require(revision>0)
         return send("DELETE",collection,id,revision)
     }
+    private val appFiles get() = "/v1/apps/$clientId/files"
+    fun listAppFiles(cursor:String?=null) =
+        fileJson("GET",appFiles+(cursor?.let{"?cursor="+URLEncoder.encode(it,"UTF-8")}.orEmpty()))
+    fun downloadAppFile(id:String) = sendBytes("GET","$appFiles/${validate(id,36)}")
+    fun deleteAppFile(id:String) = fileJson("DELETE","$appFiles/${validate(id,36)}")
+    fun startAppUpload(name:String,size:Long) =
+        fileJson("POST","$appFiles/uploads",JSONObject().put("name",name).put("size",size))
+    fun appUploadStatus(id:String) = fileJson("GET","$appFiles/uploads/${validate(id,36)}")
+    fun appendAppUpload(id:String,position:Long,content:ByteArray) =
+        fileJson("PUT","$appFiles/uploads/${validate(id,36)}",JSONObject().put("position",position)
+            .put("content",java.util.Base64.getEncoder().encodeToString(content)))
+    fun completeAppUpload(id:String) = fileJson("POST","$appFiles/uploads/${validate(id,36)}",JSONObject())
+    fun cancelAppUpload(id:String) = fileJson("DELETE","$appFiles/uploads/${validate(id,36)}")
+    private fun fileJson(method:String,path:String,body:JSONObject?=null) =
+        JSONObject(sendBytes(method,path,body=body).decodeToString())
+
     private fun validate(value:String,limit:Int):String {
         require(value.length in 1..limit && value.matches(Regex("[A-Za-z0-9_-]+"))) { "Invalid resource identifier." }
         return value
     }
     private fun send(method:String,collection:String,id:String?=null,revision:Long?=null,body:JSONObject?=null,suffix:String=""):JSONObject {
         val path="/v1/apps/$clientId/data/${validate(collection,80)}"+(id?.let { "/"+validate(it,120) } ?: "")+suffix
+        return JSONObject(sendBytes(method,path,revision,body).decodeToString())
+    }
+    private fun sendBytes(method:String,path:String,revision:Long?=null,body:JSONObject?=null):ByteArray {
         val connection=URI.create(XCenterOAuth.ISSUER+path).toURL().openConnection() as HttpURLConnection
         try {
             connection.instanceFollowRedirects=false
@@ -83,7 +102,7 @@ class XCenterServiceRecords(private val clientId:String,private val databaseKey:
             }
             val status=connection.responseCode
             if(status !in 200..299) throw XCenterOAuthException(status,null)
-            return JSONObject(connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() })
+            return connection.inputStream.use { it.readBytes() }
         } finally { connection.disconnect() }
     }
 }

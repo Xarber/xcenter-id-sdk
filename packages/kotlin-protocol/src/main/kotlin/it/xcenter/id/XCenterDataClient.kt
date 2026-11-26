@@ -56,6 +56,20 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
 
     fun accountOverview() = send("/v1/account/overview")
 
+    private val appFiles get() = "/v1/apps/${segment(requireNotNull(clientId),100)}/files"
+    fun listAppFiles(cursor: String? = null) = send(appFiles+query("cursor",cursor))
+    fun downloadAppFile(id: String) = send("$appFiles/${segment(id,36)}")
+    fun deleteAppFile(id: String) = send("$appFiles/${segment(id,36)}","DELETE")
+    fun setAppFileBrowseable(id: String, browseable: Boolean) =
+        send("$appFiles/${segment(id,36)}","PUT",JSONObject().put("browseable",browseable))
+    fun startAppUpload(name: String, size: Long, browseable: Boolean = false) =
+        send("$appFiles/uploads","POST",JSONObject().put("name",name).put("size",size).put("browseable",browseable))
+    fun appUploadStatus(id: String) = send("$appFiles/uploads/${segment(id,36)}")
+    fun appendAppUpload(id: String, position: Long, content: ByteArray) =
+        send("$appFiles/uploads/${segment(id,36)}","PUT",JSONObject().put("position",position).put("content",Base64.encode(content)))
+    fun completeAppUpload(id: String) = send("$appFiles/uploads/${segment(id,36)}","POST",JSONObject())
+    fun cancelAppUpload(id: String) = send("$appFiles/uploads/${segment(id,36)}","DELETE")
+
     fun startUpload(name: String, size: Long, folder: String? = null) =
         send("/v1/files/uploads","POST",JSONObject().put("name",name).put("size",size).put("folder",folder ?: JSONObject.NULL))
 

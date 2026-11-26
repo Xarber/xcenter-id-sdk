@@ -1,5 +1,11 @@
 # Changelog
 
+## App container file APIs
+
+- JavaScript client, server and web 0.5.0 and Expo 0.7.0 expose resumable uploads and access to files in a registered app’s own namespace.
+- Swift, Kotlin and Dart provide matching transfer, download, visibility and list operations. Verified service adapters have their own private file namespace.
+- Ordinary account folder rows return the size of committed files in their subtree.
+
 ## 0.4.0 · 2026-11-26
 
 - Added quota-based resumable uploads and shared signaling for verified apps.

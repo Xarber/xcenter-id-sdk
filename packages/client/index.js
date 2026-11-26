@@ -96,6 +96,48 @@ export function createPublicClient({fetch} = {}) {
   };
 }
 
+function createFileTransfers(request,files) {
+  const uploads=files+'/uploads';
+  return {
+    start: (file,{signal}={})=>request(uploads,{method:'POST',body:file,signal}),
+    status: (id,{signal}={})=>request(filePath(uploads,id),{signal}),
+    append: (id,chunk,{signal}={})=>request(filePath(uploads,id),{method:'PUT',body:chunk,signal}),
+    complete: (id,{signal}={})=>request(filePath(uploads,id),{method:'POST',body:{},signal}),
+    cancel: (id,{signal}={})=>request(filePath(uploads,id),{method:'DELETE',signal}),
+  };
+}
+
+async function uploadChunks(transfer,file,readChunk,{id,signal,onProgress}={}) {
+  const info=id?await transfer.status(id,{signal}):await transfer.start(file,{signal});
+  if(info.size!==undefined&&info.size!==file.size)throw new TypeError('The resumed file size must match.');
+  const uploadId=info.id;
+  let received=info.received??0;
+  onProgress?.({id:uploadId,received,total:file.size});
+  while(received<file.size){
+    const length=Math.min(info.chunkSize,file.size-received);
+    const content=await readChunk(received,length);
+    const next=await transfer.append(uploadId,{position:received,content},{signal});
+    if(next.received!==received+length)throw new Error('Unexpected upload position.');
+    received=next.received;
+    onProgress?.({id:uploadId,received,total:file.size});
+  }
+  return info.committed?{id:uploadId}:transfer.complete(uploadId,{signal});
+}
+
+export function createAppFiles(request,clientId,service=false) {
+  const files='/v1/apps/'+segment(clientId,100)+'/files';
+  const transfers=createFileTransfers(request,files);
+  const store={
+    transfers,
+    uploadChunks:(file,readChunk,options)=>uploadChunks(transfers,file,readChunk,options),
+    list:({cursor,signal}={})=>request(files+query('cursor',cursor),{signal}),
+    download:(id,{signal}={})=>request(filePath(files,id),{signal,binary:true}),
+    delete:(id,{signal}={})=>request(filePath(files,id),{method:'DELETE',signal}),
+  };
+  return service?store:{...store,setBrowseable:(id,browseable,{signal}={})=>
+    request(filePath(files,id),{method:'PUT',body:{browseable},signal})};
+}
+
 export function createUserClient({clientId, getAccessToken, fetch} = {}) {
   segment(clientId, 100);
   if (typeof getAccessToken !== 'function') throw new TypeError('Provide an end-user access token callback.');
@@ -105,14 +147,7 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
     return token;
   }});
   const files = '/v1/files', folders = files + '/folders', shared = files + '/shared';
-  const uploads=files+'/uploads';
-  const transfer = {
-    start: (file,{signal}={})=>request(uploads,{method:'POST',body:file,signal}),
-    status: (id,{signal}={})=>request(filePath(uploads,id),{signal}),
-    append: (id,chunk,{signal}={})=>request(filePath(uploads,id),{method:'PUT',body:chunk,signal}),
-    complete: (id,{signal}={})=>request(filePath(uploads,id),{method:'POST',body:{},signal}),
-    cancel: (id,{signal}={})=>request(filePath(uploads,id),{method:'DELETE',signal}),
-  };
+  const transfer=createFileTransfers(request,files);
   const routeFor=(peer,action='')=>'/v1/peers/'+segment(peer.id,24)+(action?'/'+action:'');
   const peers={
     open: (settings,{signal}={})=>request('/v1/peers',{method:'POST',body:settings,signal}),
@@ -136,28 +171,14 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
     avatar: ({signal} = {}) => request('/v1/profile/avatar', {signal, binary:true}),
     friends: ({signal} = {}) => request('/v1/profile/friends', {signal}),
     records: createRecords(request, clientId),
+    appFiles: createAppFiles(request,clientId),
     sharedRecords: {
       list: (source, collection, {cursor, signal} = {}) => request(dataPath('/v1', source, collection) + query('cursor', cursor), {signal}),
       get: (source, collection, id, {signal} = {}) => request(dataPath('/v1', source, collection, id), {signal}),
     },
     files: {
       transfers:transfer,
-      async uploadChunks(file,readChunk,{id,signal,onProgress}={}){
-        const info=id?await transfer.status(id,{signal}):await transfer.start(file,{signal});
-        if(info.size!==undefined&&info.size!==file.size)throw new TypeError('The resumed file size must match.');
-        const uploadId=info.id;
-        let received=info.received??0;
-        onProgress?.({id:uploadId,received,total:file.size});
-        while(received<file.size){
-          const length=Math.min(info.chunkSize,file.size-received);
-          const content=await readChunk(received,length);
-          const next=await transfer.append(uploadId,{position:received,content},{signal});
-          if(next.received!==received+length)throw new Error('Unexpected upload position.');
-          received=next.received;
-          onProgress?.({id:uploadId,received,total:file.size});
-        }
-        return info.committed?{id:uploadId}:transfer.complete(uploadId,{signal});
-      },
+      uploadChunks: (file,readChunk,options)=>uploadChunks(transfer,file,readChunk,options),
       list: ({folder, signal} = {}) => request(files + query('folder', folder), {signal}),
       download: (id, {signal} = {}) => request(filePath(files, id), {signal, binary:true}),
       upload: (body, {signal} = {}) => {

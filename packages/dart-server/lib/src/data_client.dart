@@ -61,6 +61,21 @@ class XCenterDataClient {
 
   Future<Uint8List> accountOverview() => _send('/v1/account/overview');
 
+  String get _appFiles => '/v1/apps/${_segment(_own,100)}/files';
+  Future<Uint8List> listAppFiles({String? cursor}) =>
+      _send(_appFiles,query:cursor==null?null:{'cursor':cursor});
+  Future<Uint8List> downloadAppFile(String id) => _send('$_appFiles/${_segment(id,36)}');
+  Future<Uint8List> deleteAppFile(String id) => _send('$_appFiles/${_segment(id,36)}',method:'DELETE');
+  Future<Uint8List> setAppFileBrowseable(String id,bool browseable) =>
+      _send('$_appFiles/${_segment(id,36)}',method:'PUT',body:{'browseable':browseable});
+  Future<Uint8List> startAppUpload(String name,int size,{bool browseable=false}) =>
+      _send('$_appFiles/uploads',method:'POST',body:{'name':name,'size':size,'browseable':browseable});
+  Future<Uint8List> appUploadStatus(String id) => _send('$_appFiles/uploads/${_segment(id,36)}');
+  Future<Uint8List> appendAppUpload(String id,int position,Uint8List content) =>
+      _send('$_appFiles/uploads/${_segment(id,36)}',method:'PUT',body:{'position':position,'content':base64Encode(content)});
+  Future<Uint8List> completeAppUpload(String id) => _send('$_appFiles/uploads/${_segment(id,36)}',method:'POST',body:{});
+  Future<Uint8List> cancelAppUpload(String id) => _send('$_appFiles/uploads/${_segment(id,36)}',method:'DELETE');
+
   Future<Uint8List> startUpload(String name, int size, {String? folder}) =>
       _send('/v1/files/uploads', method:'POST', body:{'name':name,'size':size,'folder':folder});
   Future<Uint8List> uploadStatus(String id) => _send('/v1/files/uploads/${_segment(id,36)}');

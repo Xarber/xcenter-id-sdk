@@ -140,6 +140,42 @@ public struct XCenterDataClient {
 
     public func accountOverview() async throws -> Data { try await request(["v1","account","overview"]) }
 
+    private func appFilePath(_ parts:[String] = []) throws -> [String] {
+        guard let clientID else { throw URLError(.userAuthenticationRequired) }
+        return ["v1","apps",clientID,"files"]+parts
+    }
+
+    public func listAppFiles(cursor:String? = nil) async throws -> Data {
+        try await request(appFilePath(),query:cursor.map { URLQueryItem(name:"cursor",value:$0) })
+    }
+    public func downloadAppFile(_ id:String) async throws -> Data {
+        try await request(appFilePath([id]))
+    }
+    public func deleteAppFile(_ id:String) async throws -> Data {
+        try await request(appFilePath([id]),method:"DELETE")
+    }
+    public func setAppFileBrowseable(_ id:String,browseable:Bool) async throws -> Data {
+        guard !service else { throw URLError(.userAuthenticationRequired) }
+        return try await request(appFilePath([id]),method:"PUT",body:JSONEncoder().encode(["browseable":browseable]))
+    }
+    public func startAppUpload(name:String,size:Int64,browseable:Bool = false) async throws -> Data {
+        let body:[String:Any] = ["name":name,"size":size,"browseable":browseable]
+        return try await request(appFilePath(["uploads"]),method:"POST",body:JSONSerialization.data(withJSONObject:body))
+    }
+    public func appUploadStatus(_ id:String) async throws -> Data {
+        try await request(appFilePath(["uploads",id]))
+    }
+    public func appendAppUpload(_ id:String,position:Int64,content:Data) async throws -> Data {
+        let body:[String:Any] = ["position":position,"content":content.base64EncodedString()]
+        return try await request(appFilePath(["uploads",id]),method:"PUT",body:JSONSerialization.data(withJSONObject:body))
+    }
+    public func completeAppUpload(_ id:String) async throws -> Data {
+        try await request(appFilePath(["uploads",id]),method:"POST",body:Data("{}".utf8))
+    }
+    public func cancelAppUpload(_ id:String) async throws -> Data {
+        try await request(appFilePath(["uploads",id]),method:"DELETE")
+    }
+
     public func startUpload(name: String, size: Int64, folder: String? = nil) async throws -> Data {
         var body: [String: Any] = ["name": name, "size": size]
         if let folder { body["folder"] = folder }

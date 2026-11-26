@@ -96,6 +96,17 @@ public struct XCenterServiceRecords {
     public func delete(_ collection:String,id:String,revision:Int) async throws -> Data {
         try await client.deleteRecord(collection,id:id,revision:revision)
     }
+    public func listAppFiles(cursor:String? = nil) async throws -> Data { try await client.listAppFiles(cursor:cursor) }
+    public func downloadAppFile(_ id:String) async throws -> Data { try await client.downloadAppFile(id) }
+    public func deleteAppFile(_ id:String) async throws -> Data { try await client.deleteAppFile(id) }
+    public func startAppUpload(name:String,size:Int64) async throws -> Data { try await client.startAppUpload(name:name,size:size) }
+    public func appUploadStatus(_ id:String) async throws -> Data { try await client.appUploadStatus(id) }
+    public func appendAppUpload(_ id:String,position:Int64,content:Data) async throws -> Data {
+        try await client.appendAppUpload(id,position:position,content:content)
+    }
+    public func completeAppUpload(_ id:String) async throws -> Data { try await client.completeAppUpload(id) }
+    public func cancelAppUpload(_ id:String) async throws -> Data { try await client.cancelAppUpload(id) }
+
 }
 
 
