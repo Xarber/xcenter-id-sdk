@@ -142,3 +142,62 @@ test('all public and delegated data operations use their documented wire routes'
     ['DELETE','/v1/apps/example/data/notes/entry',key],
   ]);
 });
+
+test('delegated account and peer operations keep user and peer credentials separate', async () => {
+  const requests=[];
+  const user=createUserClient({clientId:'fixture',getAccessToken:()=> 'fixture-user',fetch:async (url,request)=>{
+    requests.push({path:new URL(url).pathname,...request});
+    return Response.json({ok:true});
+  }});
+  const peer={id:'p'.repeat(24),proof:'q'.repeat(43),expiresIn:90};
+  await user.accountOverview();
+  await user.account.visibility();
+  await user.account.updateVisibility(['picture']);
+  await user.account.apps();
+  await user.account.permissions('fixture-app');
+  await user.account.disablePermission('fixture-app','friends');
+  await user.peers.open({discoverable:false});
+  await user.peers.list(peer);
+  await user.peers.send(peer,{to:'t'.repeat(24),type:'offer',data:{sdp:'fixture'}});
+  await user.peers.receive(peer);
+  await user.peers.close(peer);
+  const peerPath='/v1/peers/'+peer.id;
+  assert.deepEqual(requests.map(({path,method})=>[method,path]),[
+    ['GET','/v1/account/overview'],['GET','/v1/account/profile-visibility'],
+    ['PUT','/v1/account/profile-visibility'],['GET','/v1/account/apps'],
+    ['GET','/v1/account/apps/fixture-app/permissions'],['PUT','/v1/account/apps/fixture-app/permissions'],
+    ['POST','/v1/peers'],['GET',peerPath+'/directory'],['POST',peerPath+'/messages'],
+    ['GET',peerPath+'/messages'],['DELETE',peerPath],
+  ]);
+  assert.deepEqual(JSON.parse(requests[5].body),{scope:'friends',enabled:false});
+  assert.ok(requests.every(({headers})=>headers.Authorization==='Bearer fixture-user'));
+  assert.ok(requests.slice(0,7).every(({headers})=>!headers['X-XCenter-Peer-Proof']));
+  assert.ok(requests.slice(7).every(({headers})=>headers['X-XCenter-Peer-Proof']===peer.proof));
+});
+
+test('chunk helper resumes at the saved offset and finishes without rereading committed data', async () => {
+  const id='abcdef';
+  const reads=[];
+  const progress=[];
+  const sent=[];
+  let committed=false;
+  const user=createUserClient({clientId:'fixture',getAccessToken:()=> 'fixture-user',fetch:async (url,request)=>{
+    assert.match(url,/\/v1\/files\/uploads\/abcdef$/);
+    if(request.method==='GET')return Response.json({id,size:9,chunkSize:4,received:committed?9:4,committed});
+    if(request.method==='PUT'){
+      const chunk=JSON.parse(request.body);
+      sent.push(chunk);
+      return Response.json({received:chunk.position+Buffer.from(chunk.content,'base64').length});
+    }
+    assert.equal(request.method,'POST');
+    committed=true;
+    return Response.json({id});
+  }});
+  const source=(offset,length)=>{reads.push([offset,length]);return Buffer.alloc(length).toString('base64');};
+  const file={name:'fixture.bin',size:9};
+  assert.deepEqual(await user.files.uploadChunks(file,source,{id,onProgress:result=>progress.push(result.received)}),{id});
+  assert.deepEqual(reads,[[4,4],[8,1]]);
+  assert.deepEqual(sent.map(chunk=>chunk.position),[4,8]);
+  assert.deepEqual(progress,[4,8,9]);
+  assert.deepEqual(await user.files.uploadChunks(file,()=>assert.fail('Committed file read'),{id}),{id});
+});
