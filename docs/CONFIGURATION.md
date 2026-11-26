@@ -52,3 +52,9 @@ Store the returned transaction with the product session, redirect the user to it
 Server SDKs support beginning and completing device sign-in. Display the verification URL and short user code. Keep the polling transaction and device credential on the backend. Browser and native clients can ask their own service to start and follow approval without handling the confidential secret.
 
 Issuer sign-out opens the provider's session end page. Unlinking from the dashboard revokes a live app grant. Account administration and SMTP/IMAP retain their existing authentication boundaries.
+
+### Ask to stay signed in
+
+Include `offline_access` alongside `openid` and other required scopes in the authorization request. Use `prompt=consent` when explicitly asking the user to make or revisit this choice. X-Center ID shows **Stay signed in** on its consent page when that permission is offered. A successful sign-in can still omit a refresh token if the user declines. Treat that as a short session and keep the app usable.
+
+Use the returned refresh token as evidence that session renewal was granted. Retain it on the confidential backend, or in OS-protected storage for a public native app that owns the exchange. Refresh on demand, serialize rotation, and replace the previous token with the returned token. Clear the session and ask the user to sign in again if renewal is rejected. For backend browser handoffs, return only a product session and whether persistence was granted to the native client.
