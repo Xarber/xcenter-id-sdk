@@ -54,7 +54,7 @@ export interface UserAppFiles extends ContainerFiles<AppUpload> {
   setBrowseable(id:string,browseable:boolean,options?:Options):Promise<{ok:true}>;
 }
 export interface PeerSession {id:string;proof:string;expiresIn:number}
-export type PeerMessageType = 'offer' | 'answer' | 'candidate';
+export type PeerMessageType = 'offer' | 'answer' | 'candidate' | 'hangup';
 export interface PeerMessage {type:PeerMessageType;data:{[key:string]:Json}}
 export interface AccountSummary {storage:{used:number;capacity:number};connectedApps:number}
 export type PublicProfileField = 'username' | 'givenName' | 'surname' | 'picture';

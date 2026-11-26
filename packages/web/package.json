@@ -1,10 +1,11 @@
 {
   "name": "@xcenter-id/web",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "license": "AGPL-3.0-only",
   "exports": {
     ".": "./account-overview.js",
+    "./peers": {"types": "./peers.d.ts", "default": "./peers.js"},
     "./urls": "./urls.js",
     "./client": {
       "types": "./client.d.ts",
@@ -20,6 +21,8 @@
     "client.js",
     "client.d.ts",
     "urls.js",
+    "peers.js",
+    "peers.d.ts",
     "xcenter-id-mark.png",
     "xcenter-id-mark.svg",
     "README.md"
