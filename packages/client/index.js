@@ -147,6 +147,7 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
     if (typeof token === 'string' && token.startsWith('xid-db-')) throw new TypeError('Use database keys only in the server SDK.');
     return token;
   }});
+  const appBackups='/v1/apps/'+segment(clientId,100)+'/backups';
   const files = '/v1/files', folders = files + '/folders', shared = files + '/shared';
   const transfer=createFileTransfers(request,files);
   const routeFor=(peer,action='')=>'/v1/peers/'+segment(peer.id,24)+(action?'/'+action:'');
@@ -177,6 +178,13 @@ export function createUserClient({clientId, getAccessToken, fetch} = {}) {
     friends: ({signal} = {}) => request('/v1/profile/friends', {signal}),
     records: createRecords(request, clientId),
     appFiles: createAppFiles(request,clientId),
+    appBackups:{
+      list:({signal}={})=>request(appBackups,{signal}),
+      create:({signal}={})=>request(appBackups,{signal,method:'POST',body:{}}),
+      delete:(id,{signal}={})=>request(filePath(appBackups,id),{signal,method:'DELETE'}),
+      requestRestore:(id,{signal}={})=>request(filePath(appBackups,id)+'/restore',{signal,method:'POST',body:{}}),
+      managementURL:()=>new URL('/apps/'+segment(clientId,100)+'/backups','https://id.xcenter.it'),
+    },
     sharedRecords: {
       list: (source, collection, {cursor, signal} = {}) => request(dataPath('/v1', source, collection) + query('cursor', cursor), {signal}),
       get: (source, collection, id, {signal} = {}) => request(dataPath('/v1', source, collection, id), {signal}),

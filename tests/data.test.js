@@ -231,6 +231,11 @@ test('app files use private container routes and distinguish user and service cr
   assert.deepEqual(JSON.parse(calls[5][1].body),{browseable:true,editable:true});
   assert.equal((await user.appFiles.get(id)).id,id);
   assert.equal(calls.at(-1)[0],'/v1/apps/backup/files/'+id+'?metadata=1');
+  assert.equal((await user.appBackups.list()).id,id);
+  assert.equal((await user.appBackups.create()).id,id);
+  assert.deepEqual(calls.slice(-2).map(([path,request])=>[path,request.method]),[
+    ['/v1/apps/backup/backups','GET'],['/v1/apps/backup/backups','POST'],
+  ]);
   assert.ok(calls.every(([,request])=>request.headers.Authorization==='Bearer user-fixture'));
   calls.length=0;
   assert.equal((await service.files.uploadChunks({name:'server.zip',size:3},read)).id,id);

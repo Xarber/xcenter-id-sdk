@@ -145,6 +145,20 @@ public struct XCenterDataClient {
         return ["v1","apps",clientID,"files"]+parts
     }
 
+    public func listAppBackups() async throws -> Data {
+        try await request(Array(try appFilePath().dropLast())+["backups"])
+    }
+    public func createAppBackup() async throws -> Data {
+        try await request(Array(try appFilePath().dropLast())+["backups"],method:"POST",body:Data("{}".utf8))
+    }
+
+    public func deleteAppBackup(_ id:String) async throws -> Data {
+        try await request(Array(try appFilePath().dropLast())+["backups",id],method:"DELETE")
+    }
+    public func requestAppBackupRestore(_ id:String) async throws -> Data {
+        try await request(Array(try appFilePath().dropLast())+["backups",id,"restore"],method:"POST",body:Data("{}".utf8))
+    }
+
     public func listAppFiles(cursor:String? = nil) async throws -> Data {
         try await request(appFilePath(),query:cursor.map { URLQueryItem(name:"cursor",value:$0) })
     }

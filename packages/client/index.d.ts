@@ -19,6 +19,8 @@ export interface Records {
 }
 export type Profile = {username:string;givenName?:string;surname?:string;avatar?:string|null;verified?:boolean;admin?:boolean};
 export type UserInfo = {sub:string;name?:string;given_name?:string;family_name?:string;preferred_username?:string;picture?:string;email?:string;email_verified?:boolean;age_range?:'child'|'teen'|'adult'};
+export type AppBackup = {id:string;version:number;created:number;bytes:number;records:number;files:number;appCreated:boolean;requested:number|null};
+export type BackupPolicy = {version:number;restore:boolean};
 export type FileEntry = {id:string;name:string;size:number;created:number;sha256:string};
 export type Folder = {id:string;name:string};
 export interface PublicClient {
@@ -86,6 +88,13 @@ export interface UserClient {
   friends(options?:Options):Promise<{friends:{username:string;sub?:string}[]}>;
   records:Records;
   appFiles:UserAppFiles;
+  appBackups:{
+    list(options?:Options):Promise<{policy:BackupPolicy;allowApp:boolean;snapshots:AppBackup[]}>;
+    create(options?:Options):Promise<AppBackup>;
+    delete(id:string,options?:Options):Promise<{ok:true}>;
+    requestRestore(id:string,options?:Options):Promise<{pending:true}>;
+    managementURL():URL;
+  };
   sharedRecords:{
     list<T extends Json = Json>(client:string,collection:string,options?:PageOptions):Promise<RecordPage<T>>;
     get<T extends Json = Json>(client:string,collection:string,id:string,options?:Options):Promise<StoredRecord<T>>;

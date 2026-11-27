@@ -62,3 +62,7 @@ Every committed file returned by a list includes `sha256`, a 64-character lowerc
 | App’s verified service storage | `service.files.get(id)` | `getAppFile(id)` on the service records client |
 
 JavaScript returns a descriptor object. Swift and Dart return JSON bytes from these methods. Kotlin’s user client returns JSON bytes and its JVM service client returns a JSON object. With direct HTTPS, add `?metadata=1` to the file’s download URL and use the same credential. The response contains `id`, `name`, `size`, `created`, and `sha256`, plus applicable share or visibility fields. The download URL without this parameter still returns binary content.
+
+## App backups
+
+Enable backups and a compatibility version in Developer Apps → Storage. With the user’s separate backup grant and `app_data` token, call JavaScript `user.appBackups.list()`, `.create()`, `.delete(id)` for app-created backups, or `.requestRestore(id)`. Swift, Kotlin and Dart use `listAppBackups`, `createAppBackup`, `deleteAppBackup` and `requestAppBackupRestore`. Open the shared user interface with `user.appBackups.managementURL()` or the issuer URL `/apps/{clientId}/backups`. The app can request restore but the user confirms it in the dashboard. Snapshots share unchanged file content and immutable record versions.

@@ -57,6 +57,12 @@ class XCenterDataClient internal constructor(private val clientId: String?, priv
     fun accountOverview() = send("/v1/account/overview")
 
     private val appFiles get() = "/v1/apps/${segment(requireNotNull(clientId),100)}/files"
+    fun listAppBackups() = send("/v1/apps/${segment(requireNotNull(clientId),100)}/backups")
+    fun createAppBackup() = send("/v1/apps/${segment(requireNotNull(clientId),100)}/backups","POST",JSONObject())
+
+    fun deleteAppBackup(id:String) = send("/v1/apps/${segment(requireNotNull(clientId),100)}/backups/${segment(id,36)}","DELETE")
+    fun requestAppBackupRestore(id:String) = send("/v1/apps/${segment(requireNotNull(clientId),100)}/backups/${segment(id,36)}/restore","POST",JSONObject())
+
     fun listAppFiles(cursor: String? = null) = send(appFiles+query("cursor",cursor))
     fun getAppFile(id: String) = send("$appFiles/${segment(id,36)}?metadata=1")
     fun downloadAppFile(id: String) = send("$appFiles/${segment(id,36)}")

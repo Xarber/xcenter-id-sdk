@@ -62,6 +62,10 @@ class XCenterDataClient {
   Future<Uint8List> accountOverview() => _send('/v1/account/overview');
 
   String get _appFiles => '/v1/apps/${_segment(_own,100)}/files';
+  Future<Uint8List> listAppBackups() => _send('/v1/apps/${_segment(_own,100)}/backups');
+  Future<Uint8List> createAppBackup() => _send('/v1/apps/${_segment(_own,100)}/backups', method: 'POST', body: {});
+  Future<Uint8List> deleteAppBackup(String id) => _send('/v1/apps/${_segment(_own,100)}/backups/${_segment(id,36)}', method: 'DELETE');
+  Future<Uint8List> requestAppBackupRestore(String id) => _send('/v1/apps/${_segment(_own,100)}/backups/${_segment(id,36)}/restore', method: 'POST', body: {});
   Future<Uint8List> listAppFiles({String? cursor}) =>
       _send(_appFiles,query:cursor==null?null:{'cursor':cursor});
   Future<Uint8List> getAppFile(String id) => _send('$_appFiles/${_segment(id,36)}', query: {'metadata':'1'});
