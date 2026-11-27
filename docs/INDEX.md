@@ -4,6 +4,8 @@ The packages provide account settings surfaces and secure sign-in integration fo
 
 - [Peer connections](PEER_CONNECTIONS.md) explains same-app discovery, calls, screen sharing and data channels.
 - [App container files](APP_CONTAINER_FILES.md) covers private and Browseable files, uploads and downloads.
+- [Encryption and ADP](https://id.xcenter.it/docs/encryption) describes production encryption and pilot capabilities.
+- [App backup reference](https://id.xcenter.it/docs/sdk/list-app-backups) describes the metadata and links to the management methods.
 - [Active SDK tasks](ACTIVE_TASKS.md)
 - [Configuration and sign-in](CONFIGURATION.md)
 - [Data clients and backend SDK](DATA_CLIENTS.md)

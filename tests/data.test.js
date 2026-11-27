@@ -209,11 +209,15 @@ test('chunk helper resumes at the saved offset and finishes without rereading co
 test('app files use private container routes and distinguish user and service credentials', async () => {
   const calls=[];
   const id='abcdef11-1234-1234-9123-1234567890ab';
+  const sha256='a'.repeat(64);
+  const snapshot={id,sha256,version:1,created:1795776000000,bytes:515,records:0,files:1,appCreated:true,requested:null,selection:{records:null,files:'all'}};
   const fixture=async (url,options)=>{
     calls.push([new URL(url).pathname+new URL(url).search,options]);
     if(options.method==='PUT'&&url.includes('/uploads/'))return Response.json({received:3});
     if(options.method==='POST'&&url.endsWith('/uploads'))return Response.json({id,chunkSize:524288});
     if(options.method==='GET'&&url.endsWith(id))return new Response('abc');
+    if(url.endsWith('/backups'))return Response.json(options.method==='GET'
+      ?{policy:{version:1,restore:true,selection:snapshot.selection},allowApp:true,snapshots:[snapshot]}:snapshot);
     return Response.json({id,ok:true,files:[],nextCursor:null});
   };
   const user=createUserClient({clientId:'backup',getAccessToken:()=> 'user-fixture',fetch:fixture});
@@ -231,8 +235,8 @@ test('app files use private container routes and distinguish user and service cr
   assert.deepEqual(JSON.parse(calls[5][1].body),{browseable:true,editable:true});
   assert.equal((await user.appFiles.get(id)).id,id);
   assert.equal(calls.at(-1)[0],'/v1/apps/backup/files/'+id+'?metadata=1');
-  assert.equal((await user.appBackups.list()).id,id);
-  assert.equal((await user.appBackups.create()).id,id);
+  assert.deepEqual((await user.appBackups.list()).snapshots,[snapshot]);
+  assert.deepEqual(await user.appBackups.create(),snapshot);
   await user.appBackups.delete(id);
   await user.appBackups.requestRestore(id);
   assert.equal(user.appBackups.managementURL().href,'https://id.xcenter.it/apps/backup/backups');

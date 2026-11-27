@@ -19,13 +19,15 @@ Start by [registering the app](integration.md). For platform differences and ver
 | Upload, rename, move and delete account files. Create, rename, move and delete empty folders | `files_write` | User files |
 | List and download incoming shared files | `shared_files_read` | User files |
 | Authorization code + PKCE, ID token validation, refresh rotation and device flow | Registered sign-in, confidential backend for device flow | Public platform OAuth clients and confidential backend SDKs |
-| Historical saved-place dataset | Confidential registration and `app_data` | Backend migration client |
+| Create, list and manage user app backups | `app_data` and the account owner’s backup permission | App backup methods |
 
-Account settings, credentials, administrator actions, friends management, mailbox operations, app registration, private-app membership, cross-app grants, and database configuration use the hosted dashboard. An app token and a database key grant only their designated permissions. The mail UI and SMTP/IMAP use separate account credentials. There is no third-party account mutation or mail scope. X-Center ID currently does not advertise OAuth token revocation. To revoke live access, unlink the app in the dashboard. Product sign-out clears the product session and its saved credentials. Ending an issuer session alone does not replace grant revocation.
+Account settings, credentials, administrator actions, friends management, mailbox operations, app registration, private-app membership, cross-app grants, and database configuration use the hosted dashboard. An app token and a database key grant only their designated permissions. The mail UI and SMTP/IMAP use separate account credentials. Administrator-designated trusted apps can request user-consented account scopes. Mail remains a first-party account capability. X-Center ID currently does not advertise OAuth token revocation. To revoke live access, unlink the app in the dashboard. Product sign-out clears the product session and its saved credentials. Ending an issuer session alone does not replace grant revocation.
 
 Hosted records require explicit `public` on every write. Put with revision 0 to create. Read an existing record before replacing or deleting it, and send its returned revision. Only retry a stale write after dealing with the conflicting change. Continue list requests with the server's `nextCursor`. Developer-controlled sharing allows reads of the current user's source records, subject to consent. It does not expose the service database.
 
 The inline base64 upload supports 1 byte to 2 MiB. Use the [resumable transfer API](ACCOUNT_AND_PEER_APIS.md#quota-limited-file-transfer) for files up to the account’s remaining quota. The dashboard handles recursive deletion, shared-file access changes, and capacity management. File download methods return the bytes or a binary response. Manage images with a native image loader or a browser object URL, and release temporary files and object URLs after use. Treat downloaded content as untrusted.
+
+For field-by-field backup responses, see [app backups](https://id.xcenter.it/docs/sdk/list-app-backups). Standard storage encryption and the opt-in ADP pilot are described in [Encryption and ADP](https://id.xcenter.it/docs/encryption).
 
 ## JavaScript, Expo and plain Node.js
 

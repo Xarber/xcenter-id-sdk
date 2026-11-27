@@ -20,7 +20,7 @@ export interface Records {
 export type Profile = {username:string;givenName?:string;surname?:string;avatar?:string|null;verified?:boolean;admin?:boolean};
 export type UserInfo = {sub:string;name?:string;given_name?:string;family_name?:string;preferred_username?:string;picture?:string;email?:string;email_verified?:boolean;age_range?:'child'|'teen'|'adult'};
 export type BackupSelection = {records:string[]|null;files:'none'|'all'|'browseable'|'editable'};
-export type AppBackup = {id:string;version:number;created:number;bytes:number;records:number;files:number;appCreated:boolean;requested:number|null;selection:BackupSelection};
+export type AppBackup = {id:string;sha256:string;version:number;created:number;bytes:number;records:number;files:number;appCreated:boolean;requested:number|null;selection:BackupSelection};
 export type BackupPolicy = {version:number;restore:boolean;selection:BackupSelection};
 export type FileEntry = {id:string;name:string;size:number;created:number;sha256:string};
 export type Folder = {id:string;name:string};

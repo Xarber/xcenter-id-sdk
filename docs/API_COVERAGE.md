@@ -15,14 +15,14 @@ Audit dated 25 November 2026. Provider production revision `7124b6b` (0.17.0). P
 | Refresh and rotate a session | Direct with caller-provided persistence | Direct with caller-provided persistence | Direct with caller-provided persistence | Direct with caller-provided persistence | Direct with caller-provided persistence | Direct with caller-provided persistence |
 | Device approval initiation and polling | Own backend | Own backend | Swift server package on macOS | Kotlin/JVM server package | Dart server package | Node server package |
 | Verified app service storage | Own backend | Own backend | Swift server package on macOS | Kotlin/JVM server package | Dart server package | Node server package |
-| Historical saved-place endpoints | Own backend | Own backend | Swift server package | Kotlin/JVM server package | Dart server package | Node server package |
+| List, create and manage user app backups | Direct | Direct | Direct | Direct | Direct | Direct |
 | Product sign-out | Host session | Host session | Host session | Host session | Host session | Host session |
 | End the issuer session | SDK exposes issuer URL | SDK exposes issuer URL | SDK exposes issuer URL | SDK exposes issuer URL | SDK exposes issuer URL | SDK exposes issuer URL |
 | Revoke a live app grant | Hosted Linked apps flow | Hosted Linked apps flow | Hosted Linked apps flow | Hosted Linked apps flow | Hosted Linked apps flow | Hosted Linked apps flow. Live discovery has no OAuth revocation endpoint |
 
 “Direct” means the SDK contains the operation. It still requires the matching active registration and granted scope where applicable. “Backend” can be the existing Node.js SDK or a backend using the same HTTP contract. Service writes must remain server-side even when the consuming app uses Swift, Kotlin or Flutter. The Swift server product uses Apple Security on macOS. Kotlin/JVM and standalone Dart support backends without a mobile toolchain. Public native and browser SDKs never need a client secret.
 
-The delegated file upload endpoint accepts up to 2 MiB of nonempty data. Chunked uploads, recursive delete, changing file shares and account usage are available through the account dashboard. Account, passkey, device, mailbox, email verification, contact management, developer registration, callback approval, entitlements, quotas and administration endpoints use first-party sessions. The issuer does not expose third-party access scopes for them. Mail clients authenticate separately through SMTP/IMAP.
+The delegated inline upload accepts up to 2 MiB. Resumable uploads support larger files up to remaining account quota. Recursive delete, changing file shares and account usage are available through the account dashboard. Account, passkey, device, mailbox, email verification, contact management, developer registration, callback approval, entitlements, quotas and administration endpoints use first-party sessions. See the [trusted-app account scope guide](ACCOUNT_AND_PEER_APIS.md) for the limited account controls an administrator-designated app can request with user consent. Mail clients authenticate separately through SMTP/IMAP.
 
 ## Verification
 

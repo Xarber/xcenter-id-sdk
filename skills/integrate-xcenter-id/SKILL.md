@@ -55,6 +55,10 @@ For an app-managed file index, read the lowercase SHA-256 digest in `sha256` on 
 
 ## App backups
 
-Enable backups and a compatibility version in Developer Apps → Storage. With the user’s separate backup grant and `app_data` token, call JavaScript `user.appBackups.list()`, `.create()`, `.delete(id)` for app-created backups, or `.requestRestore(id)`. Swift, Kotlin and Dart use `listAppBackups`, `createAppBackup`, `deleteAppBackup` and `requestAppBackupRestore`. Open the shared user interface with `user.appBackups.managementURL()` or the issuer URL `/apps/{clientId}/backups`. The app can request restore but the user confirms it in the dashboard. Snapshots share unchanged file content and immutable record versions.
+Enable backups and a compatibility version in Developer Apps → Storage. With the user’s separate backup grant and `app_data` token, call JavaScript `user.appBackups.list()`, `.create()`, `.delete(id)` for app-created backups, or `.requestRestore(id)`. Swift, Kotlin and Dart use `listAppBackups`, `createAppBackup`, `deleteAppBackup` and `requestAppBackupRestore`. Open the shared user interface with `user.appBackups.managementURL()` or the issuer URL `/apps/{clientId}/backups`. The app can request restore but the user confirms it in the dashboard. Snapshots share unchanged file content and immutable record versions. Index each snapshot by its `id` and compare its `sha256` captured-manifest fingerprint within the same account and app.
 
 The developer can limit backups to approved collection names or exact `collection/recordId` selections, and choose no files, all files, Browseable files, or Browseable + Editable files. Check the snapshot's `selection` before describing a restore to users. Restoring a filtered category updates only captured items.
+
+## Encryption and ADP
+
+Production app data uses server-managed encryption. The protected-storage compatibility setting is a declaration. Production ADP and third-party protected-storage APIs are unavailable. Keep using standard records and files and follow [Encryption and ADP](https://id.xcenter.it/docs/encryption) for pilot status.
